@@ -6,7 +6,7 @@
 
 | 名称    | 环境     | 内网地址                   | 公网地址                    |
 | ------- | -------- | -------------------------- | --------------------------- |
-| Gitlab  | 阿里云   | -                          | http://gitlab.sfdapp.com    |
+| Gitlab  | 阿里云   | -                          | https://gitlab.sfdapp.com   |
 | Jenkins | 公司内网 | http://192.168.2.170:32000 | http://182.150.31.33:32000/ |
 
 ## 2. CI/CD 架构
@@ -70,11 +70,11 @@ A Pod(as in a pod of whales or pea pod) is a group of one or more containers, wi
 
 > Kubelet、Kubectl、Kubeadm
 
-| Name    | Remark                                                                                                                       | Type    |
-| ------- | ---------------------------------------------------------------------------------------------------------------------------- | ------- |
-| Kubelet | the primary "node agent" that runs on each node                                                                              | Service |
-| Kubectl | command-line tool allows you to run commands against Kubernetes clusters                                                     | Command |
-| Kubeadm | a tool built to provide kubeadm init and kubeadm join as best-practice "fast paths" for creating Kubernetes clusters Runtime | Command |
+| Name    | Remark                                                                                               | Type    |
+| ------- | ---------------------------------------------------------------------------------------------------- | ------- |
+| Kubelet | the primary "node agent" that runs on each node                                                      | Service |
+| Kubectl | command-line tool allows you to run commands against Kubernetes clusters                             | Command |
+| Kubeadm | provide kubeadm init and kubeadm join as best-practice "fast paths" for creating Kubernetes clusters | Command |
 
 ### 3.1 迁移代码仓库
 
