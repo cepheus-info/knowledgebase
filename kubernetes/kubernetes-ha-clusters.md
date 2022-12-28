@@ -1,13 +1,13 @@
 # Setup Kubernetes Highly Available Clusters
 
-## Overview
+## 1. Overview
 
 We can setup kubernetes clusters with stacked control plane nodes. This approach requires less infrastructure. The etcd members and control plane nodes are co-located.
 
 The following diagram shows the architecture of a Kubernetes cluster with stacked control plane nodes.
 ![HA with Stacked Control Plane Topology](images/kubernetes-cluster-stacked-control-plane-diagram.png)
 
-## Prerequisites
+## 2. Prerequisites
 
 At least 3 nodes are required to setup a Kubernetes cluster with stacked control plane nodes. The following table shows the minimum requirements for each node.
 
@@ -41,21 +41,21 @@ At least 3 nodes are required to setup a Kubernetes cluster with stacked control
   sudo swapoff -a
   ```
 
-## Setup Kubernetes HA Cluster
+## 3. Setup Kubernetes HA Cluster
 
-### Install Container Runtime
+### 3.1 Install Container Runtime
 
 We can use containerd as the container runtime for Kubernetes. We can install containerd by following the steps in the [Install Containerd](install-containerd.md) document.
 
 Also CRI-O can be used as an alternative. We can install CRI-O by following the steps in the [Install CRI-O](install-cri-o.md) document.
 
-### Install Kubernetes Components
+### 3.2 Install Kubernetes Components
 
 - [Install kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)
 - [Install kubelet](https://kubernetes.io/docs/tasks/tools/install-kubelet/)
 - [Install kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 
-### Enable kubelet service
+### 3.3 Enable kubelet service
 
 ```bash
 sudo systemctl enable --now kubelet
@@ -63,13 +63,13 @@ sudo systemctl enable --now kubelet
 rc-update add kubelet
 ```
 
-## LoadBalancing via keepalived & haproxy
+## 4. LoadBalancing via keepalived & haproxy
 
-### Overview of LoadBalancing
+### 4.1 Overview of LoadBalancing
 
 You can eighter install LoadBalancing Components externalized or stacked as well. See below for architecture diagrams.
 
-#### External LoadBalancer
+#### 4.1.1 External LoadBalancer
 
 ![External LoadBalancer](images/external-loadbalancer.png)
 
@@ -85,7 +85,7 @@ You can eighter install LoadBalancing Components externalized or stacked as well
 - Requires it’s own hardware (or virtual hardware)
 - Additional management and operational overhead
 
-#### Stacked LoadBalancer
+#### 4.1.2 Stacked LoadBalancer
 
 ![Stacked LoadBalancer](images/stacked-loadbalancer.png)
 
@@ -109,9 +109,9 @@ Thus you will need to run kubeadm init with --control-plane-endpoint dnsname:644
 
 ![](images/stack-port-conflict.png)
 
-### Prepare LoadBalancer Configuration
+### 4.2 Prepare LoadBalancer Configuration
 
-#### KeepAlived
+#### 4.2.1 KeepAlived
 
 KeepAlived configuration consists of keepalived.conf & check_apiserver.sh.
 
@@ -172,7 +172,7 @@ if ip addr | grep -q ${APISERVER_VIP}; then
 fi
 ```
 
-#### HAProxy
+#### 4.2.2 HAProxy
 
 HAProxy configuration consists of haproxy.cfg
 
@@ -235,9 +235,9 @@ backend apiserver
 - ${HOST1_ADDRESS} a resolvable address (DNS name, IP address) for the first load-balanced API Server host
   additional server lines, one for each load-balanced API Server host
 
-### Install LoadBalancer Components
+### 4.3 Install LoadBalancer Components
 
-#### LoadBalancer via package manager
+#### 4.3.1 LoadBalancer via package manager
 
 This approach make sense if we are using externalized topology.
 
@@ -246,7 +246,7 @@ systemctl enable haproxy --now
 systemctl enable keepalived --now
 ```
 
-#### LoadBalancer via static pods in kubernetes cluster
+#### 4.3.2 LoadBalancer via static pods in kubernetes cluster
 
 If keepalived and haproxy will be running on the control plane nodes they can be configured to run as static pods.
 
@@ -326,9 +326,9 @@ spec:
 status: {}
 ```
 
-## Configure Kubernetes
+## 5. Configure Kubernetes
 
-### Init Kubernetes Cluster
+### 5.1 Init Kubernetes Cluster
 
 > create a file named kubeadm-config.yaml on master1 with below content:
 
@@ -376,7 +376,7 @@ sudo kubeadm init --control-plane-endpoint dnsname:6444
 sudo kubeadm init --config kubeadm-config.yaml
 ```
 
-### Configure kubectl
+### 5.2 Configure kubectl
 
 > Execute below command on master1:
 
@@ -391,29 +391,29 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 kubectl get nodes
 ```
 
-### Install pod network
+### 5.3 Install pod network
 
 ```bash
 # Install Calico
 kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/master/manifests/calico.yaml
 ```
 
-### Use crictl to check container runtime
+### 5.4 Use crictl to check container runtime
 
 ```bash
 # Use crictl to check container runtime
 sudo crictl ps
 ```
 
-## Troubleshooting
+## 6. Troubleshooting
 
-### Use journalctl to check kubelet logs
+### 6.1 Use journalctl to check kubelet logs
 
 ```bash
 sudo journalctl -u kubelet -fex
 ```
 
-### Swap is enabled
+### 6.2 Swap is enabled
 
 If you got error like below, you can try to disable swap and try again.
 
@@ -425,7 +425,7 @@ If you got error like below, you can try to disable swap and try again.
         [ERROR Swap]: running with swap on is not supported. Please disable swap
 ```
 
-### IP_Forward is not enabled
+### 6.3 IP_Forward is not enabled
 
 - If you got error like below, you can try step Forwarding IPv4 and letting iptables see bridged traffic above.
 
@@ -440,7 +440,7 @@ error execution phase preflight: [preflight] Some fatal errors occurred:
 	[ERROR FileContent--proc-sys-net-ipv4-ip_forward]: /proc/sys/net/ipv4/ip_forward contents are not set to 1
 ```
 
-### Coredns is stuck in pending state
+### 6.4 Coredns is stuck in pending state
 
 ```bash
 kubectl get pods -n kube-system
@@ -487,7 +487,7 @@ kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/master/m
 kubectl get pods -n kube-system
 ```
 
-### Container runtime is not running
+### 6.5 Container runtime is not running
 
 When you execute kubeadm init on ubuntu server, you may get error like below, you can remove /etc/containerd/config.toml and restart containerd service.
 
@@ -500,7 +500,7 @@ error execution phase preflight: [preflight] Some fatal errors occurred:
 time="2022-11-15T08:18:34Z" level=fatal msg="getting status of runtime: rpc error: code = Unimplemented desc = unknown service runtime.v1alpha2.RuntimeService"
 ```
 
-### Cannot resolve dns after cluster created
+### 6.6 Cannot resolve dns after cluster created
 
 When use kubectl apply to run application on cluster, an error occurred like below:
 
@@ -522,7 +522,7 @@ NETCONFIG_DNS_STATIC_SERVERS="4.2.2.4"
 sudo netconfig update -f
 ```
 
-### Pods stuck in Pending status
+### 6.7 Pods stuck in Pending status
 
 When we run kubernetes-dashboard via below command:
 
@@ -556,7 +556,7 @@ Events:
 
 You can override tolerations or run some worker nodes to avoid this problem.
 
-### Calico not running
+### 6.8 Calico not running
 
 ```bash
 Warning  Unhealthy     3m26s (x2 over 3m26s)  kubelet            Readiness probe failed: calico/node is not ready: BIRD is not ready: Error querying BIRD: unable to connect to BIRDv4 socket: dial unix /var/run/calico/bird.ctl: connect: connection refused
@@ -564,7 +564,7 @@ Warning  Unhealthy     3m26s (x2 over 3m26s)  kubelet            Readiness probe
 
 Calico needs auto detection for multiple ip address interface. Calico will detect the first available interface as the interface. So we need to configure a Virtual IP lower than the Real IP for ordering issue.
 
-### Calico tolerations
+### 6.9 Calico tolerations
 
 ```bash
 Tolerations:                 CriticalAddonsOnly op=Exists
@@ -584,7 +584,7 @@ kubectl taint nodes --all node-role.kubernetes.io/master-
 # kubectl taint nodes --all node.kubernetes.io/not-ready:NoExecute
 ```
 
-### Container runtime network not ready
+### 6.10 Container runtime network not ready
 
 ```bash
 KubeletNotReady              container runtime network not ready: NetworkReady=false reason:NetworkPluginNotReady message:Network plugin returns error: No CNI configuration file in /etc/cni/net.d/. Has your network provider started?
@@ -611,7 +611,7 @@ plugin_dirs = [
 ]
 ```
 
-### path "/sys" is not a shared mount point
+### 6.11 path "/sys" is not a shared mount point
 
 When applying calico.yaml, such error as below occurred like: Error: path "/sys/fs" is mounted on "/sys" but it is not a shared mount
 
