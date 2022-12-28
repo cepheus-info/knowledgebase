@@ -1,0 +1,15 @@
+version: "3.7"
+services:
+  jenkins_sample_spring_boot:
+    build: .
+    image: cepheus990910/jenkins-sample-spring-boot:${APP_VERSION}
+    environment:
+      ENV_STAGE: development
+    networks:
+      JENKINS:
+        aliases:
+          - jenkins-sample-spring-boot
+volumes:
+  sfdapp:
+networks:
+  JENKINS:

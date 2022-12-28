@@ -1,0 +1,5 @@
+tmp-k8s/
+dump.json
+dump.yaml
+helm/
+apps/

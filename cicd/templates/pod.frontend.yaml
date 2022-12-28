@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+    # container jnlp is for the jenkins agent container
+    - name: jnlp
+      image: jenkins/inbound-agent:4.10-3
+      imagePullPolicy: IfNotPresent
+      volumeMounts:
+        # jenkins-repos for reference repository
+        - name: jenkins-repos
+          mountPath: /home/jenkins/repos
+      resources:
+        requests:
+          cpu: 1000m
+          memory: 4096Mi
+        limits:
+          cpu: 1000m
+          memory: 4096Mi
+      workingDir: /home/jenkins/agent
+    # container gitversion for SemVer
+    - name: gitversion
+      image: gittools/gitversion:5.11.1-alpine.3.13-6.0
+      imagePullPolicy: IfNotPresent
+      command:
+        - "sleep"
+      args:
+        - "99d"
+      resources:
+        limits:
+          cpu: 500m
+          memory: 512Mi
+    # container node for build frontend projects
+    - name: node
+      image: node:lts-slim
+      imagePullPolicy: IfNotPresent
+      command:
+        - "sleep"
+      args:
+        - "99d"
+      volumeMounts:
+        # jenkins-npm for npm packages cache
+        - name: jenkins-npm
+          mountPath: /home/jenkins/.npm
+      resources:
+        requests:
+          cpu: 500m
+          memory: 4096Mi
+        limits:
+          cpu: 1000m
+          memory: 8192Mi
+    # container docker for build & push images
+    - name: docker
+      image: docker:latest
+      imagePullPolicy: IfNotPresent
+      command:
+        - sleep
+      args:
+        - "99d"
+      tty: true
+      volumeMounts:
+        - name: docker-sock
+          mountPath: /var/run/docker.sock
+      resources:
+        limits:
+          cpu: 500m
+          memory: 512Mi
+  volumes:
+    - name: jenkins-repos
+      persistentVolumeClaim:
+        claimName: jenkins-repos-pv-claim
+    - name: jenkins-npm
+      persistentVolumeClaim:
+        claimName: jenkins-npm-pv-claim
+    - name: docker-sock
+      hostPath:
+        path: /var/run/docker.sock

@@ -1,0 +1,10 @@
+frontend/
+java/
+kafka/
+linux/
+microservices/
+mongodb/
+security/
+writings/
+100-days-challenge.*
+*.pdf

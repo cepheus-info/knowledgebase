@@ -1,0 +1,64 @@
+/* groovylint-disable-next-line CompileStatic */
+String version
+
+// use kubernetes podTemplate
+podTemplate(
+    yaml: readTrusted(path: 'pod.yaml'),
+    workspaceVolume: persistentVolumeClaimWorkspaceVolume(claimName: 'jenkins-workspace-pv-claim', readOnly: false)
+) {
+    node(POD_LABEL) {
+        stage('Checkout') {
+            echo '========Executing Checkout========'
+
+            checkout scm
+
+            always {
+                echo '========Checkout finished========'
+            }
+        }
+
+        stage('Gitversion') {
+            echo '========Git version========'
+            container('gitversion') {
+                /* groovylint-disable-next-line LineLength */
+                version = sh(
+                    script:'/tools/dotnet-gitversion /showvariable InformationalVersion',
+                    returnStdout: true
+                ).trim()
+            }
+
+            echo "========Version: ${version}========"
+            currentBuild.displayName = "#${env.BUILD_ID} v${version}"
+        }
+
+        stage('Build') {
+            withGradle {
+                sh 'chmod a+x gradlew'
+                sh './gradlew build -x test'
+            }
+
+            always {
+                echo '========Gradle build finished========'
+            }
+            onFailure {
+                echo '========Gradle build execution failed========'
+            }
+        }
+
+        stage('Bake Docker image') {
+            container('docker') {
+                echo '========docker-compose========'
+                /* groovylint-disable-next-line GStringExpressionWithinString */
+                // sh 'curl -XPOST -v --unix-socket /var/run/docker.sock http://localhost/build'
+                // sh 'docker build -t cepheus990910/jenkins-sample-spring-boot:${env.BUILD_ID} .'
+                docker.withRegistry('', 'cepheus990910') {
+                    // customImage = docker.build("cepheus990910/jenkins-sample-spring-boot:${version}")
+                    // customImage.push()
+                    sh "export APP_VERSION=${version} \
+                       && docker compose -f docker-compose.yml build \
+                       && docker compose -f docker-compose.yml push"
+                }
+            }
+        }
+    }
+}

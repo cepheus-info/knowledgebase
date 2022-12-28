@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+    # container jnlp is for the jenkins agent container
+    - name: jnlp
+      image: jenkins/inbound-agent:4.10-3
+      imagePullPolicy: IfNotPresent
+      volumeMounts:
+        # jenkins-repos for reference repository
+        - name: jenkins-repos
+          mountPath: /home/jenkins/repos
+        # jenkins-gradle for gradle build cache
+        - name: jenkins-gradle
+          mountPath: /home/jenkins/.gradle
+          # As gradle cannot run parallel, we must use a different .gradleHome for each project via subPath
+          subPath: project-name
+      resources:
+        requests:
+          cpu: 1000m
+          memory: 4096Mi
+        limits:
+          cpu: 1000m
+          memory: 4096Mi
+      workingDir: /home/jenkins/agent
+    # container gitversion for SemVer
+    - name: gitversion
+      image: gittools/gitversion:5.11.1-alpine.3.13-6.0
+      imagePullPolicy: IfNotPresent
+      command:
+        - "sleep"
+      args:
+        - "99d"
+      volumeMounts:
+        - name: jenkins-repos
+          mountPath: /home/jenkins/repos
+      resources:
+        limits:
+          cpu: 500m
+          memory: 512Mi
+    # container docker for build & push image
+    - name: docker
+      image: docker:latest
+      imagePullPolicy: IfNotPresent
+      command:
+        - sleep
+      args:
+        - "99d"
+      tty: true
+      volumeMounts:
+        # docker.sock for sharing host's docker engine
+        - name: docker-sock
+          mountPath: /var/run/docker.sock
+      resources:
+        limits:
+          cpu: 500m
+          memory: 512Mi
+  volumes:
+    - name: jenkins-repos
+      persistentVolumeClaim:
+        claimName: jenkins-repos-pv-claim
+    - name: jenkins-gradle
+      persistentVolumeClaim:
+        claimName: jenkins-gradle-pv-claim
+    - name: docker-sock
+      hostPath:
+        path: /var/run/docker.sock
