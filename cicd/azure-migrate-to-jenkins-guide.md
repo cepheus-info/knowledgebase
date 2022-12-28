@@ -13,6 +13,8 @@
 
 > 注意: 192.168.2.170 地址是 kubernetes 集群创建的 Virtual IP，通过 KeepAlived + HAProxy 起到负载均衡的作用，实际的 kubernetes 集群环境如下所示:
 
+> 同时需要注意：VIP 所使用的端口是 6443(即 kubernetes api server 的默认端口)，但 master 节点 IP 此处更换端口为 6444 以防止端口绑定冲突。详细说明参见 [Kubernetes HA Clusters#4.1.2 Stacked Loadbalancer](../kubernetes/kubernetes-ha-clusters.md#412-stacked-loadbalancer)
+
 ![ci architecture](./images/ci-architecture.drawio.png)
 
 | 名称    | 节点       | 内网地址      | 备注                                     |
@@ -29,7 +31,7 @@
 
 ### 3.0 kubernetes 集群的搭建与 Jenkins 准备工作
 
-此部分请参考如下文档以及 kubernetes 官方文档, 本文不再赘述。
+_此部分请参考如下文档以及 kubernetes 官方文档, 本文不再赘述。_
 
 - [Kubernetes HA Clusters](../kubernetes/kubernetes-ha-clusters.md)
 - [Kubernetes HA Clusters Hands-on](../kubernetes/kubernetes-ha-clusters-hands-on.md)
@@ -78,6 +80,8 @@ A Pod(as in a pod of whales or pea pod) is a group of one or more containers, wi
 
 ### 3.1 迁移代码仓库
 
+_执行位置: 本地 & Gitlab UI_
+
 ```bash
 # 1. 清理远端仓库，例如: 删除不必要的远端分支, 包括已合并过的release分支等
 # 2. 克隆本地仓库
@@ -93,6 +97,8 @@ git push -u origin --tags
 ```
 
 ### 3.2 准备 Jenkinsfile
+
+_执行位置: 本地_
 
 将调整后的[pod.yaml](./templates/pod.yaml)与[Jenkinsfile](./templates/Jenkinsfile)复制进当前待迁移工程中。
 
@@ -246,7 +252,9 @@ podTemplate(
 
 ### 3.3 准备 reference repository
 
-Reference repository 是一个 git 仓库的镜像仓库，可帮助克隆代码时加速网络访问。此步骤将在 NFS 服务器中创建 git 镜像仓库。
+_执行位置: NFS 服务器_
+
+Reference repository 是一个 git 仓库的镜像仓库，可帮助克隆代码时加速网络访问。此步骤将在 NFS 服务器中创建 git 镜像仓库，并在 [3.4 创建 Multi branch pipeline](#34-创建-multi-branch-pipeline) 中配置使用。
 
 登入 NFS207 服务器，在 jenkins-repos-pv-claim 下 mirror clone 对应工程的代码。
 
@@ -271,6 +279,8 @@ git clone --reference /home/jenkins/repos/smso-auth-backend.git http://gitlab.sf
 
 ### 3.4 创建 Multi-branch pipeline
 
+_执行位置：Jenkins UI_
+
 在 Jenkins UI 中，选择 New-Item 并使用 Multi-branch pipeline 的方式创建 Build Configuration。
 
 - 需注意使用 Filter by Name (Regular Expression) 来过滤需要 Build 的分支。
@@ -280,9 +290,31 @@ git clone --reference /home/jenkins/repos/smso-auth-backend.git http://gitlab.sf
   ```
 
 - 需注意添加 Advanced clone behaviours -> Path of the reference repo to use during clone 来添加 Reference Repository
+
+  此实例中为：/home/jenkins/repos/smso-auth-backend.git，请结合以下摘要的 volume 配置理解该路径的绑定位置。
+
+```yaml
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+    # container jnlp is for the jenkins agent container
+    - name: jnlp
+      volumeMounts:
+        # jenkins-repos for reference repository
+        - name: jenkins-repos
+          mountPath: /home/jenkins/repos
+  volumes:
+    - name: jenkins-repos
+      persistentVolumeClaim:
+        claimName: jenkins-repos-pv-claim
+```
+
 - Build Configuration 使用的是 by Jenkinsfile，即代码仓库中扫描到的 Jenkinsfile 文件，默认使用 root 路径
 
 ### 3.5 添加 Gitlab Webhook
+
+_执行位置: Gitlab UI_
 
 Gitlab 中的 Integration 方式无法在目前的版本中工作，主要原因是新版本 Jenkins 服务器的安全策略限制，需要提供 CSRF token 防护，而 Gitlab 的集成方式未提供。
 
