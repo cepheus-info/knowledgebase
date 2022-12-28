@@ -293,7 +293,7 @@ _执行位置：Jenkins UI_
 
   此示例中为：/home/jenkins/repos/smso-auth-backend.git，请结合以下摘要的 volumes / volumeMounts 配置理解该路径的绑定位置。
 
-  volumes 中的 jenkins-repos-pv-claim 是在 [Jenkins Agent Deployment](./jenkins-agent-deployment.md#3-create-volume) 中提前创建的，[./resources/](./resources/)目录中有 pvc volume.yaml 文件。
+  volumes 中的 jenkins-repos-pv-claim 是在 [Jenkins Agent Deployment](./jenkins-agent-deployment.md#3-create-volume) 一文中提前创建的，[resources/](./resources/) 目录中有 pvc volume.yaml 文件。
 
   ```yaml
   apiVersion: v1
@@ -336,7 +336,7 @@ http://182.150.31.33:32000/ <-> http://192.168.2.170:32000/
 
 ![Gitlab Webhook配置](images/gitlab-webhook.png)
 
-## 结论
+## 4. 结论
 
 Azure DevOps 迁移至 Jenkins 的主要难度在于各个环节的逻辑需要自行理解清楚。
 
