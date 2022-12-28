@@ -172,7 +172,9 @@ spec:
 
 > Jenkinsfile
 
-Jenkinsfile 我们使用的是 scripted pipeline 的语法，应当与 declarative pipeline 的语法区分开来。可浏览 Jenkins 官方文档了解更多语法相关特点。
+以下 Jenkinsfile 使用的是 Scripted pipeline 的语法，应当与 Declarative pipeline 的语法区分开来。可浏览 Jenkins 官方文档了解更多语法相关特点。
+
+也可查看 [http://your_jenkins_url/pipeline-syntax](http://192.168.2.170:32000/pipeline-syntax) 以生成 Pipeline Steps 供参考。
 
 ```groovy
 /* groovylint-disable-next-line CompileStatic */
@@ -244,20 +246,22 @@ podTemplate(
 
 ### 3.3 准备 reference repository
 
+Reference repository 是一个 git 仓库的镜像仓库，可帮助克隆代码时加速网络访问。此步骤将在 NFS 服务器中创建 git 镜像仓库。
+
 登入 NFS207 服务器，在 jenkins-repos-pv-claim 下 mirror clone 对应工程的代码。
 
-> 注意: 如果忘记为 gitversion 容器挂载 reference repository 目录，gitversion 命令将会报错，本地可以通过删除 reference repository 来重现。
+> 注意: 如果忘记为 gitversion 容器挂载 reference repository 目录，gitversion 命令将会报错。例如，镜像仓库被删除后，在本地仓库中运行 gitversion 命令将抛出异常。
 
 ```bash
 # jenkins-repos是jnlp, gitversion容器中均需要访问到的pvc，原因是git scm拉取步骤和gitversion计算步骤都需要reference repository实际可访问才能工作
 cd /home/share/kubernetes/devops-tools-jenkins-repos-pv-claim-pvc-4d8999cc-1339-41ae-b8cd-ef78598f4a9d/
 # mirror clone是一种将仓库用作纯镜像的方式，不会检出work tree
 git clone --mirror http://gitlab.sfdapp.com/smso-saas/smso-auth-backend.git
-# mirror clone 的代码可以通过以下命令更新
+# mirror clone 的代码可以不定期通过以下命令更新
 git remote update
 ```
 
-> 以下是 reference clone 的命令
+> 以下是 reference clone 的命令 (供参考，不需要执行)
 
 ```bash
 # 使用reference clone选项可以加速拉取代码的过程，镜像仓库已有的内容不需要再次产生网络访问
@@ -294,7 +298,7 @@ http://182.150.31.33:32000/ <-> http://192.168.2.170:32000/
 | ------------------------------------------------------------------- | ---------------------------- |
 | http://182.150.31.33:32000/project/smso-qna/smso-qna-micro-frontend | /project/group/pipeline-name |
 
-[x]注意去掉勾选 Enable SSL verification 选项
+[x] 注意去掉勾选 Enable SSL verification 选项
 
 ![Gitlab Webhook配置](images/gitlab-webhook.png)
 
