@@ -80,7 +80,7 @@ A Pod(as in a pod of whales or pea pod) is a group of one or more containers, wi
 
 ### 3.1 迁移代码仓库
 
-_执行位置: 本地 & Gitlab UI_
+_执行位置: 本地 PC & Gitlab UI_
 
 ```bash
 # 1. 清理远端仓库，例如: 删除不必要的远端分支, 包括已合并过的release分支等
@@ -98,9 +98,9 @@ git push -u origin --tags
 
 ### 3.2 准备 Jenkinsfile
 
-_执行位置: 本地_
+_执行位置: 本地 PC_
 
-将调整后的[pod.yaml](./templates/pod.yaml)与[Jenkinsfile](./templates/Jenkinsfile)复制进当前待迁移工程中。
+将调整后的 [pod.yaml](./templates/pod.yaml) 与 [Jenkinsfile](./templates/Jenkinsfile) 复制进当前待迁移工程中。
 
 > 注意: 此处以后端使用的配置文件为例说明，前端应当使用 templates/下的另外版本
 
@@ -289,26 +289,28 @@ _执行位置：Jenkins UI_
   ^main|master|release/.*|hotfix/.*|develop$
   ```
 
-- 需注意添加 Advanced clone behaviours -> Path of the reference repo to use during clone 来添加 Reference Repository
+- 需注意添加 Advanced clone behaviours -> Path of the reference repo to use during clone 来指定 Reference Repository
 
-  此实例中为：/home/jenkins/repos/smso-auth-backend.git，请结合以下摘要的 volume 配置理解该路径的绑定位置。
+  此示例中为：/home/jenkins/repos/smso-auth-backend.git，请结合以下摘要的 volumes / volumeMounts 配置理解该路径的绑定位置。
 
-```yaml
-apiVersion: v1
-kind: Pod
-spec:
-  containers:
-    # container jnlp is for the jenkins agent container
-    - name: jnlp
-      volumeMounts:
-        # jenkins-repos for reference repository
-        - name: jenkins-repos
-          mountPath: /home/jenkins/repos
-  volumes:
-    - name: jenkins-repos
-      persistentVolumeClaim:
-        claimName: jenkins-repos-pv-claim
-```
+  volumes 中的 jenkins-repos-pv-claim 是在 [Jenkins Agent Deployment](./jenkins-agent-deployment.md#3-create-volume) 中提前创建的，[./resources/](./resources/)目录中有 pvc volume.yaml 文件。
+
+  ```yaml
+  apiVersion: v1
+  kind: Pod
+  spec:
+    containers:
+      # container jnlp is for the jenkins agent container
+      - name: jnlp
+        volumeMounts:
+          # jenkins-repos for reference repository
+          - name: jenkins-repos
+            mountPath: /home/jenkins/repos
+    volumes:
+      - name: jenkins-repos
+        persistentVolumeClaim:
+          claimName: jenkins-repos-pv-claim
+  ```
 
 - Build Configuration 使用的是 by Jenkinsfile，即代码仓库中扫描到的 Jenkinsfile 文件，默认使用 root 路径
 
@@ -330,10 +332,12 @@ http://182.150.31.33:32000/ <-> http://192.168.2.170:32000/
 | ------------------------------------------------------------------- | ---------------------------- |
 | http://182.150.31.33:32000/project/smso-qna/smso-qna-micro-frontend | /project/group/pipeline-name |
 
-[x] 注意去掉勾选 Enable SSL verification 选项
+[-] 注意去掉勾选 Enable SSL verification 选项
 
 ![Gitlab Webhook配置](images/gitlab-webhook.png)
 
 ## 结论
 
-Azure DevOps 迁移至 Jenkins 的主要难度在于各个环节的逻辑需要自行理解清楚，包括对 Kubernetes 基本原理的掌握、Git 的工作方式、Jenkins master 与 Jenkins Agent 的关系，以及对 Jenkins pipeline 语法的掌握，都是较为独立的知识体系，开发人员与运维人员均需要对其技术实质有一个较为清晰全面的认识。
+Azure DevOps 迁移至 Jenkins 的主要难度在于各个环节的逻辑需要自行理解清楚。
+
+对 Kubernetes 基本原理的掌握、Git 的工作方式、Jenkins master 与 Jenkins Agent 的关系，以及对 Jenkins pipeline 语法的掌握，都是较为独立的知识体系，开发人员与运维人员均需要对其技术实质有一个较为清晰全面的认识。
