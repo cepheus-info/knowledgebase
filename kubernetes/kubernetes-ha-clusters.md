@@ -105,7 +105,7 @@ You can eighter install LoadBalancing Components externalized or stacked as well
 
 As we cannot bind the same port twice, there would be a port conflict if we do not choose another port for api server.
 
-Thus you will need to run kubeadm init with --control-plane-endpoint dnsname:6443 command like this [kubeadm init --control-plane-endpoint](#kubeadmInitControlPlaneEndpoint)
+Thus you will need to run kubeadm init with --control-plane-endpoint dnsname:6444 command like this [kubeadm init --control-plane-endpoint](#kubeadmInitControlPlaneEndpoint)
 
 ![](images/stack-port-conflict.png)
 
