@@ -759,7 +759,7 @@ kubectl port-forward -n kubernetes-dashboard services/kubernetes-dashboard 10443
 
 > Now we can use https://192.168.74.100:10443 to access dashboard with previously created token.
 
-### 10.3 Node selector for workload
+## 11 Node selector for workload
 
 ```bash
 # Use --show-labels to view existing label
