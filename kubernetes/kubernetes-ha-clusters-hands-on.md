@@ -1,10 +1,10 @@
 # Kubernetes Highly Available Clusters Hands-On
 
-## Overview
+## 1. Overview
 
 This is a step by step guide to setup Kubernetes Highly Available Clusters. We will setup a Kubernetes cluster with stacked control plane nodes. This approach requires less infrastructure. The etcd members and control plane nodes are co-located.
 
-## Prepare the host machines
+## 2. Prepare the host machines
 
 - An OpenSUSE Tumbleweed machine with a hostname master1, also tried Alpine Linux for a minimal host environment. See [Install Alpine Linux on VMware](install-alpine-linux-on-vmware.md) for more information.
 - An Ubuntu 22.04 machine with a hostname master2.
@@ -39,11 +39,11 @@ Note fedora need to enable remote connection manually. You can use a GUI tool in
 
 ![Fedora remote login](images/fedora-remote-login.png)
 
-## Install Container Runtime
+## 3. Install Container Runtime
 
 We'll use cri-o as the container runtime for master1, but containerd for master2 and master3.
 
-### CRI-O on openSUSE
+### 3.1 CRI-O on openSUSE
 
 > Execute below commands on openSUSE Tumbleweed machine:
 
@@ -63,7 +63,7 @@ We can use curl to check if the container runtime is working:
 sudo curl -v --unix-socket /var/run/crio/crio.sock http://localhost/info | jq
 ```
 
-### CRI-O on Alpine Linux
+### 3.2 CRI-O on Alpine Linux
 
 > Update you repositories under /etc/apk/repositories to include community, edge community and testing.
 
@@ -86,7 +86,7 @@ apk add cni-plugins
 rc-update add crio
 ```
 
-### CRI-O Configuration
+### 3.3 CRI-O Configuration
 
 > Note you should check /etc/crio/crio.conf.d/ for image registry configurations.
 
@@ -136,7 +136,7 @@ kill -l
 pkill -1 crio
 ```
 
-### Containerd on Ubuntu
+### 3.4 Containerd on Ubuntu
 
 > Uninstall old versions of containerd:
 
@@ -175,7 +175,7 @@ sudo apt-get update
 sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
 ```
 
-### Containerd on Fedora
+### 3.5 Containerd on Fedora
 
 > Uninstall old versions of containerd:
 
@@ -216,9 +216,9 @@ sudo dnf install docker-ce docker-ce-cli containerd.io docker-compose-plugin
 sudo systemctl start docker
 ```
 
-## Preqrequisites for Kubernetes
+## 4. Preqrequisites for Kubernetes
 
-### Forwarding IPv4 and letting iptables see bridged traffic
+### 4.1 Forwarding IPv4 and letting iptables see bridged traffic
 
 ```bash
 cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
@@ -240,7 +240,7 @@ EOF
 sudo sysctl --system
 ```
 
-### Forwarding IPv4 and letting iptables see bridged traffic (For Alpine Linux)
+### 4.2 Forwarding IPv4 and letting iptables see bridged traffic (For Alpine Linux)
 
 ```bash
 echo "overlay" >> /etc/modules-load.d/k8s.conf
@@ -253,7 +253,7 @@ echo "net.ipv4.ip_forward               =1" >> /etc/sysctl.conf
 sysctl -p
 ```
 
-### Disable firewall
+### 4.3 Disable firewall
 
 > For openSUSE Tumbleweed:
 
@@ -269,7 +269,7 @@ sudo systemctl disable ufw
 sudo systemctl stop ufw
 ```
 
-### Disable IPv6 (Not neccecary if use mirror repository)
+### 4.4 Disable IPv6 (Not neccecary if use mirror repository)
 
 <i>Also, we should disable ipv6 temporaly while update package index via google.com</i>
 
@@ -298,7 +298,7 @@ sudo vi /etc/modprobe.d/disable-ipv6.conf
 sudo reboot
 ```
 
-### Apply http_proxy to containerd (Not neccecary if use mirror repository)
+### 4.5 Apply http_proxy to containerd (Not neccecary if use mirror repository)
 
 This step is optional. If you are behind a proxy, you need to apply the proxy to containerd. Actually, cri-o will use the proxy in /etc/environment by default. But containerd seems not.
 
@@ -315,7 +315,7 @@ sudo systemctl daemon-reload
 sudo systemctl restart containerd
 ```
 
-### Sync time via ntpd
+### 4.6 Sync time via ntpd
 
 > Use ntpd to sync time in Alpine linux:
 
@@ -331,11 +331,11 @@ ntpd -d -q -n -p 185.209.85.222 # this is the ip address of pool.ntp.org
 sudo ntpdate pool.ntp.org
 ```
 
-## Install Kubernetes
+## 5. Install Kubernetes
 
-### Install via package manager
+### 5.1 Install via package manager
 
-#### Install kubeadm, kubelet and kubectl on openSUSE
+#### 5.1.1 Install kubeadm, kubelet and kubectl on openSUSE
 
 > Execute below commands on openSUSE Tumbleweed machine:
 
@@ -343,7 +343,7 @@ sudo ntpdate pool.ntp.org
 sudo zypper install kubernetes-kubeadm kubernetes-client
 ```
 
-#### Install kubeadm, kubelet and kubectl on Alpine Linux
+#### 5.1.2 Install kubeadm, kubelet and kubectl on Alpine Linux
 
 > Execute below commands on Alpine Linux machine:
 
@@ -353,7 +353,7 @@ apk add kubeadm
 apk add kubectl
 ```
 
-#### Install kubeadm, kubelet and kubectl on Ubuntu
+#### 5.1.3 Install kubeadm, kubelet and kubectl on Ubuntu
 
 > Execute below commands on Ubuntu 22.04 machine:
 
@@ -386,7 +386,7 @@ sudo apt-get install -y kubelet kubeadm kubectl
 sudo apt-mark hold kubelet kubeadm kubectl
 ```
 
-#### Install kubeadm, kubelet and kubectl on Ubuntu via aliyun mirrors
+#### 5.1.4 Install kubeadm, kubelet and kubectl on Ubuntu via aliyun mirrors
 
 ```bash
 sudo apt-get update && apt-get install -y apt-transport-https
@@ -398,7 +398,7 @@ sudo apt-get update
 sudo apt-get install -y kubelet kubeadm kubectl
 ```
 
-#### Install kubeadm, kubelet and kubectl on Fedora
+#### 5.1.5 Install kubeadm, kubelet and kubectl on Fedora
 
 > Execute below commands on Fedora 36 machine:
 
@@ -420,7 +420,7 @@ sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
 sudo dnf install -y kubeadm kubelet kubectl --disableexcludes=kubernetes
 ```
 
-### Enable kubelet service
+### 5.2 Enable kubelet service
 
 ```bash
 sudo systemctl enable --now kubelet
@@ -428,11 +428,11 @@ sudo systemctl enable --now kubelet
 rc-update add kubelet
 ```
 
-## LoadBalancing via keepalived & haproxy
+## 6. LoadBalancing via keepalived & haproxy
 
-### Prepare LoadBalancer Configuration
+### 6.1 Prepare LoadBalancer Configuration
 
-#### Overview
+#### 6.1.1 Overview
 
 Considering below networking topology:
 
@@ -443,7 +443,7 @@ Considering below networking topology:
 | controlPlane02 | 192.168.74.139 | master2 |
 | controlPlane03 | 192.168.74.138 | master3 |
 
-#### File Structure
+#### 6.1.2 File Structure
 
 | File               | Target Path                               |
 | ------------------ | ----------------------------------------- |
@@ -453,9 +453,9 @@ Considering below networking topology:
 | keepalived.yaml    | /etc/kubernetes/manifests/keepalived.yaml |
 | haproxy.yaml       | /etc/kubernetes/manifests/haproxy.yaml    |
 
-### Install LoadBalancer Components
+### 6.2 Install LoadBalancer Components
 
-#### LoadBalancer via static pods in kubernetes cluster
+#### 6.2.1 LoadBalancer via static pods in kubernetes cluster
 
 Copy previously created config files to server location /home/kubernetes/loadbalance,
 Edit them with respect to host information. And then execute below commands to copy to target path.
@@ -483,9 +483,9 @@ cp /home/kubernetes/loadbalance/haproxy.cfg /etc/haproxy
 cp /home/kubernetes/loadbalance/*.yaml /etc/kubernetes/manifests
 ```
 
-## Configure Kubernetes
+## 7. Configure Kubernetes
 
-### Init Kubernetes Cluster
+### 7.1 Init Kubernetes Cluster
 
 > create a file named kubeadm-config.yaml on master1 with below content:
 
@@ -494,6 +494,7 @@ cp /home/kubernetes/loadbalance/*.yaml /etc/kubernetes/manifests
 kind: InitConfiguration
 apiVersion: kubeadm.k8s.io/v1beta3
 localAPIEndpoint:
+# master1 ip address
   advertiseAddress: "192.168.74.133"
   bindPort: 6444
 ---
@@ -503,6 +504,7 @@ kubernetesVersion: v1.24.3
 networking:
   serviceSubnet: "10.96.0.0/16"
   podSubnet: "10.244.0.0/24"
+# vip ip address & port
 controlPlaneEndpoint: "192.168.74.100:6443"
 # This is a personal mirror hosted on docker hub, check availability before use
 imageRepository: "docker.io/k8simage"
@@ -531,7 +533,7 @@ localAPIEndpoint:
 sudo kubeadm init --config kubeadm-config.yaml
 ```
 
-### Configure kubectl
+### 7.2 Configure kubectl
 
 > Execute below command on master1:
 
@@ -548,23 +550,23 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 kubectl get nodes
 ```
 
-### Install pod network
+### 7.3 Install pod network
 
 ```bash
 # Install Calico
 kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/master/manifests/calico.yaml
 ```
 
-### Use crictl to check container runtime
+### 7.4 Use crictl to check container runtime
 
 ```bash
 # Use crictl to check container runtime
 sudo crictl ps
 ```
 
-## kubeadm join
+### 7.5 kubeadm join
 
-### First copy certificates from master1 to other master nodes.
+#### 7.5.1 First copy certificates from master1 to other master nodes.
 
 ```bash
 # Execute below command to create target directories first
@@ -605,7 +607,7 @@ sudo kubeadm token create --print-join-command
 sudo kubeadm join 192.168.74.100:6443 --token ag1o4m.dsyhniky9m0r3l3p --discovery-token-ca-cert-hash sha256:a06d6a459ecde712a32a713d17d523e4b6d9a742d61c14e420825fb0969f7e03 --control-plane --apiserver-bind-port 6444
 ```
 
-## Reset a primary node
+## 8. How to Reset a primary node
 
 0. Ensure you have /etc/keepalived/keepalived.conf, /etc/keepalived/check_apiserver.sh, /etc/haproxy/haproxy.cfg exists.
 
@@ -627,7 +629,7 @@ sudo cp /home/kubernetes/loadbalance/*.yaml /etc/kubernetes/manifests/
 sudo kubeadm init --config kubeadm-config.yaml
 ```
 
-## Reset a backup node
+## 9. Reset a backup node
 
 0. Ensure you have /etc/keepalived/keepalived.conf, /etc/keepalived/check_apiserver.sh, /etc/haproxy/haproxy.cfg exists.
 
@@ -663,9 +665,9 @@ sudo kubeadm token create --print-join-command
 sudo kubeadm join 192.168.74.100:6443 --token ag1o4m.dsyhniky9m0r3l3p --discovery-token-ca-cert-hash sha256:a06d6a459ecde712a32a713d17d523e4b6d9a742d61c14e420825fb0969f7e03 --control-plane --apiserver-bind-port 6444
 ```
 
-## Kubernetes dashboard
+## 10. Kubernetes dashboard
 
-### Run kubernetes dashboard
+### 10.1 Run kubernetes dashboard
 
 1. Run kubernetes dashboard
 
@@ -714,11 +716,11 @@ kubectl apply -f cluster-role.yaml
 kubectl -n kubernetes-dashboard create token admin-user
 ```
 
-### Proxy or Port forward dashboard
+### 10.2 Proxy or Port forward dashboard
 
-#### Use kubectl proxy
+#### 10.2.1 Use kubectl proxy
 
-##### Run kubectl proxy on cluster machine
+##### 10.2.1.1 Run kubectl proxy on cluster machine
 
 ```bash
 # Use kubectl proxy for accessing dashboard ui
@@ -730,7 +732,7 @@ Kubectl will make Dashboard available at http://localhost:8001/api/v1/namespaces
 
     But actually we still cannot access dashboard through another machine, because it limited we can use token authorization only via https connection.
 
-##### Run kubectl proxy on client machine
+##### 10.2.1.2 Run kubectl proxy on client machine
 
     We can install kubernetes client on Linux Desktop(Not server because we need to use a browser), WSL(Windows Subsystem for Linux).
 
@@ -748,7 +750,7 @@ sudo zypper install kubernetes-client
 
 > Kubectl will make Dashboard available at http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/.
 
-#### Port forward
+#### 10.2.2 Port forward
 
 ```bash
 # Use kubectl portforward
@@ -757,7 +759,7 @@ kubectl port-forward -n kubernetes-dashboard services/kubernetes-dashboard 10443
 
 > Now we can use https://192.168.74.100:10443 to access dashboard with previously created token.
 
-### Node selector for workload
+### 10.3 Node selector for workload
 
 ```bash
 # Use --show-labels to view existing label
