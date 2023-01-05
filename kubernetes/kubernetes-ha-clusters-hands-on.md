@@ -216,6 +216,19 @@ sudo dnf install docker-ce docker-ce-cli containerd.io docker-compose-plugin
 sudo systemctl start docker
 ```
 
+### 3.6 Containerd config
+
+Use below config to create default containerd config
+
+```bash
+# create config.toml
+containerd config default > /etc/containerd/config.toml
+# restart containerd service
+systemctl restart containerd
+# you can also use ctr plugin list to check plugin status
+ctr plugin list
+```
+
 ## 4. Preqrequisites for Kubernetes
 
 ### 4.1 Forwarding IPv4 and letting iptables see bridged traffic
@@ -494,9 +507,11 @@ cp /home/kubernetes/loadbalance/*.yaml /etc/kubernetes/manifests
 kind: InitConfiguration
 apiVersion: kubeadm.k8s.io/v1beta3
 localAPIEndpoint:
-# master1 ip address
+  # master1 ip address
   advertiseAddress: "192.168.74.133"
   bindPort: 6444
+nodeRegistration:
+  criSocket: "unix:///var/run/crio/crio.sock"
 ---
 kind: ClusterConfiguration
 apiVersion: kubeadm.k8s.io/v1beta3
@@ -603,8 +618,9 @@ sudo chmod a+r /etc/kubernetes/*
 sudo kubeadm token create --print-join-command
 # You should append --control-plane to the printed command for joining with as control-plane
 # You should append --apiserver-bind-port as well for planned topology
+# You should append --cri-socket unix:///var/run/crio/crio.sock for multi cri runtime environment
 # Join with command
-sudo kubeadm join 192.168.74.100:6443 --token ag1o4m.dsyhniky9m0r3l3p --discovery-token-ca-cert-hash sha256:a06d6a459ecde712a32a713d17d523e4b6d9a742d61c14e420825fb0969f7e03 --control-plane --apiserver-bind-port 6444
+sudo kubeadm join 192.168.74.100:6443 --token ag1o4m.dsyhniky9m0r3l3p --discovery-token-ca-cert-hash sha256:a06d6a459ecde712a32a713d17d523e4b6d9a742d61c14e420825fb0969f7e03 --control-plane --apiserver-bind-port 6444 --cri-socket unix:///var/run/crio/crio.sock
 ```
 
 ## 8. How to Reset a primary node
@@ -627,6 +643,14 @@ sudo cp /home/kubernetes/loadbalance/*.yaml /etc/kubernetes/manifests/
 
 ```bash
 sudo kubeadm init --config kubeadm-config.yaml
+```
+
+4. Configure kubectl
+
+```bash
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 
 ## 9. Reset a backup node
@@ -662,7 +686,7 @@ sudo chmod a+r /etc/kubernetes/*
 # print join command
 sudo kubeadm token create --print-join-command
 # remember to append bind port
-sudo kubeadm join 192.168.74.100:6443 --token ag1o4m.dsyhniky9m0r3l3p --discovery-token-ca-cert-hash sha256:a06d6a459ecde712a32a713d17d523e4b6d9a742d61c14e420825fb0969f7e03 --control-plane --apiserver-bind-port 6444
+sudo kubeadm join 192.168.74.100:6443 --token ag1o4m.dsyhniky9m0r3l3p --discovery-token-ca-cert-hash sha256:a06d6a459ecde712a32a713d17d523e4b6d9a742d61c14e420825fb0969f7e03 --control-plane --apiserver-bind-port 6444 --cri-socket unix:///var/run/crio/crio.sock
 ```
 
 ## 10. Kubernetes dashboard

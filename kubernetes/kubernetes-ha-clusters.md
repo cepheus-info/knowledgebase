@@ -339,6 +339,8 @@ apiVersion: kubeadm.k8s.io/v1beta3
 localAPIEndpoint:
   advertiseAddress: "192.168.74.133"
   bindPort: 6444
+nodeRegistration:
+  criSocket: "unix:///var/run/crio/crio.sock"
 ---
 kind: ClusterConfiguration
 apiVersion: kubeadm.k8s.io/v1beta3
@@ -630,9 +632,13 @@ Events:
   Warning  Failed     12s (x3 over 27s)  kubelet            Error: path "/var/run/calico" is mounted on "/" but it is not a shared mount
 ```
 
+Or maybe you can find such mount error above in /var/log/kubelet/kubelet.log, it depends.
+
 To fix this, use below commands to make shared mount.
 
 ```bash
 mount --make-shared /sys
 mount --make-shared /
+# after that, restart crio service to apply changes.
+rc-service crio restart
 ```
