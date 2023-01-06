@@ -486,3 +486,13 @@ podTemplate(
     }
 }
 ```
+
+### Prepare common PersistentVolumeClaims for jenkins agent
+
+Note that our pod.yaml uses some common pvcs like "jenkins-repos-pv-claim", "jenkins-workspace-pv-claim", "jenkins-gradle-pv-claim", etc. We should create those resources before any pipeline creation.
+
+Use below yaml files for pvc creation
+
+- [jenkins-gradle/volume.yaml](./resources/jenkins-gradle/volume.yaml)
+- [jenkins-repos/volume.yaml](./resources/jenkins-repos/volume.yaml)
+- [jenkins-workspace/volume.yaml](./resources/jenkins-workspace/volume.yaml)
