@@ -58,6 +58,8 @@ spec:
 
 ### Deploying your storage class
 
+You can refer to [https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner](https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner) for more details.
+
 ```yaml
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -65,5 +67,6 @@ metadata:
   name: nfs-client
 provisioner: k8s-sigs.io/nfs-subdir-external-provisioner # or choose another name, must match deployment's env PROVISIONER_NAME'
 parameters:
+  pathPattern: "${.PVC.namespace}-${.PVC.name}"
   archiveOnDelete: "false"
 ```

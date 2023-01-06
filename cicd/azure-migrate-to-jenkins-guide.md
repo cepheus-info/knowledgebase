@@ -262,7 +262,7 @@ Reference repository 是一个 git 仓库的镜像仓库，可帮助克隆代码
 
 ```bash
 # jenkins-repos是jnlp, gitversion容器中均需要访问到的pvc，原因是git scm拉取步骤和gitversion计算步骤都需要reference repository实际可访问才能工作
-cd /home/share/kubernetes/devops-tools-jenkins-repos-pv-claim-pvc-4d8999cc-1339-41ae-b8cd-ef78598f4a9d/
+cd /home/share/kubernetes/devops-tools-jenkins-repos-pv-claim/
 # mirror clone是一种将仓库用作纯镜像的方式，不会检出work tree
 git clone --mirror http://gitlab.sfdapp.com/smso-saas/smso-auth-backend.git
 # mirror clone 的代码可以不定期通过以下命令更新
@@ -275,6 +275,15 @@ git remote update
 # 使用reference clone选项可以加速拉取代码的过程，镜像仓库已有的内容不需要再次产生网络访问
 git clone --reference /home/jenkins/repos/smso-auth-backend.git http://gitlab.sfdapp.com/smso-saas/smso-auth-backend.git --dissociate
 # 注意dissociate命令会完整展开镜像仓库的引用至本地，即不再与reference repository有关联，但Jenkins的git scm步骤没有提供该选项，所以仍然需要采用挂载jenkins-repos目录的方式使reference repository可访问
+```
+
+> 注意: jenkins-repos-pv-claim 是在 pod.yaml 中指定创建且使用 nfs-provisioner，因此需在创建 nfs-client storage class 时指定名称创建的 pathPattern，见 [Use NFS as Storage Class](../kubernetes/use-nfs-as-storage-class.md#deploying-your-storage-class)。否则目录创建时会动态生成名称 uuid，给灾难恢复、文件夹维护等过程带来不便。
+
+```bash
+# 动态创建的名称如下
+/home/share/kubernetes/devops-tools-jenkins-repos-pv-claim-pvc-4d8999cc-1339-41ae-b8cd-ef78598f4a9d
+# 使用pathPattern创建的名称如下
+/home/share/kubernetes/devops-tools-jenkins-repos-pv-claim
 ```
 
 ### 3.4 创建 Multi-branch pipeline
