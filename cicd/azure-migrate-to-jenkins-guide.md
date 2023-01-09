@@ -6,8 +6,18 @@
 
 | 名称    | 环境     | 内网地址                   | 公网地址                    |
 | ------- | -------- | -------------------------- | --------------------------- |
-| Gitlab  | 阿里云   | -                          | https://gitlab.sfdapp.com   |
+| Gitlab  | 阿里云   | -                          | http://gitlab.sfdapp.com    |
 | Jenkins | 公司内网 | http://192.168.2.170:32000 | http://182.150.31.33:32000/ |
+
+> 注意: gitlab 地址使用 https，遇到了 jenkins inbound agent 容器中无法 clone 部分仓库的问题如下，因此目前暂时使用 http。后续需排查该错误的详细原因，考虑尝试升级 inbound agent 中使用的 git client。
+
+```bash
+$ git clone https://gitlab.sfdapp.com/smso-infrastructure/smso-measure-test-ci.git
+Cloning into 'smso-measure-test-ci'...
+Username for 'https://gitlab.sfdapp.com': xxx
+Password for 'https://xxx@gitlab.sfdapp.com':
+error: RPC failed; curl 56 GnuTLS recv error (-110): The TLS connection was non-properly terminated.
+```
 
 ## 2. CI/CD 架构
 
