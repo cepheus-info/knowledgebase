@@ -186,6 +186,12 @@ spec:
         path: /var/run/docker.sock
 ```
 
+- 需要替换 project-name 为目标工程名称
+- 需要注意前端工程应增加 nodejs 容器进行 build，同时移除不必要的 gradle 目录挂载
+- 需要根据实际内存需求情况调整 resources limits
+- cpu 单位 m 表示毫核 1m cpu = 1 / 1000 cpu
+- memory 单位 Mi, Gi 分别对应 MiB, GiB
+
 > Jenkinsfile
 
 以下 Jenkinsfile 使用的是 Scripted pipeline 的语法，应当与 Declarative pipeline 的语法区分开来。可浏览 Jenkins 官方文档了解更多语法相关特点。
@@ -259,6 +265,9 @@ podTemplate(
 }
 
 ```
+
+- 需要注意替换 APP_VERSION 标识为 docker-compose.yml 中实际使用的标识，例如: SMSO_VERSION_TAG
+- 需要注意 gradlew build 命令增加的 -x test 参数，排除默认的 UnitTest
 
 ### 3.3 准备 reference repository
 
