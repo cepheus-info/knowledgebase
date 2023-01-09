@@ -9,7 +9,7 @@
 | Gitlab  | 阿里云   | -                          | http://gitlab.sfdapp.com    |
 | Jenkins | 公司内网 | http://192.168.2.170:32000 | http://182.150.31.33:32000/ |
 
-> 注意: gitlab 地址使用 https，遇到了 jenkins inbound agent 容器中无法 clone 部分仓库的问题如下，因此目前暂时使用 http。后续需排查该错误的详细原因，考虑尝试升级 inbound agent 中使用的 git client。
+> 注意: gitlab 地址使用 https，遇到了 jenkins master 容器中无法 clone 部分仓库的问题如下，因此目前暂时使用 http。后续需排查该错误的详细原因，考虑尝试升级 jenkins master built-in node 中使用的 git client (实际可能 jenkins inbound agent 中同样存在此问题)。
 
 ```bash
 $ git clone https://gitlab.sfdapp.com/smso-infrastructure/smso-measure-test-ci.git
