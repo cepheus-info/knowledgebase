@@ -12,11 +12,11 @@ spec:
           mountPath: /home/jenkins/repos
       resources:
         requests:
-          cpu: 1000m
-          memory: 4096Mi
+          cpu: 500m
+          memory: 1024Mi
         limits:
-          cpu: 1000m
-          memory: 4096Mi
+          cpu: 500m
+          memory: 1024Mi
       workingDir: /home/jenkins/agent
     # container gitversion for SemVer
     - name: gitversion
@@ -45,10 +45,10 @@ spec:
       resources:
         requests:
           cpu: 500m
-          memory: 4096Mi
+          memory: 2048Mi
         limits:
-          cpu: 1000m
-          memory: 8192Mi
+          cpu: 500m
+          memory: 2048Mi
     # container docker for build & push images
     - name: docker
       image: docker:latest
