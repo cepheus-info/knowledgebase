@@ -32,7 +32,8 @@ spec:
           memory: 512Mi
     # container node for build frontend projects
     - name: node
-      image: node:lts-slim
+      # as we cannot use lts for some old frontend projects, use v16 instead
+      image: node:16.19.0-slim
       imagePullPolicy: IfNotPresent
       command:
         - "/bin/sh"
