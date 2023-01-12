@@ -133,14 +133,15 @@ spec:
         - name: jenkins-gradle
           mountPath: /home/jenkins/.gradle
           # As gradle cannot run parallel, we must use a different .gradleHome for each project via subPath
+          # Actually, we cannot start the same build twice as soon as we use a .gradleHome
           subPath: project-name
       resources:
         requests:
           cpu: 1000m
-          memory: 4096Mi
+          memory: 2048Mi
         limits:
           cpu: 1000m
-          memory: 4096Mi
+          memory: 2048Mi
       workingDir: /home/jenkins/agent
     # container gitversion for SemVer
     - name: gitversion
@@ -191,6 +192,7 @@ spec:
 - 需要根据实际内存需求情况调整 resources limits
 - cpu 单位 m 表示毫核 1m cpu = 1 / 1000 cpu
 - memory 单位 Mi, Gi 分别对应 MiB, GiB
+- 后端工程的.gradleHome 目录是根据工程名称来配置的，同一工程不能同时开启两次 build(目前仅挂载.gradleHome/下的 caches 目录也无法实现 gradle build 并行运行)
 
 > Jenkinsfile
 
