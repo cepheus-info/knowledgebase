@@ -3,8 +3,10 @@ String version
 
 // use kubernetes podTemplate
 podTemplate(
-    yaml: readTrusted(path: 'pod.yaml'),
-    workspaceVolume: persistentVolumeClaimWorkspaceVolume(claimName: 'jenkins-workspace-pv-claim', readOnly: false)
+    yaml: readTrusted(path: 'pod.yaml')
+// Note that for frontend project, there's a problem about node_modules/ folder cleanup,
+// so we do not mount workspace volume here
+// workspaceVolume: persistentVolumeClaimWorkspaceVolume(claimName: 'jenkins-workspace-pv-claim', readOnly: false)
 ) {
     node(POD_LABEL) {
         stage('Checkout') {
