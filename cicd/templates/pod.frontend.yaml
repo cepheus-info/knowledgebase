@@ -35,20 +35,22 @@ spec:
       image: node:lts-slim
       imagePullPolicy: IfNotPresent
       command:
-        - "sleep"
+        - "/bin/sh"
       args:
-        - "99d"
+        - "-c"
+        - "chown 1000:1000 /root/.npm && sleep 99d"
+      runAsUser: root
       volumeMounts:
         # jenkins-npm for npm packages cache
         - name: jenkins-npm
-          mountPath: /home/jenkins/.npm
+          mountPath: /root/.npm
       resources:
         requests:
           cpu: 500m
-          memory: 2048Mi
+          memory: 4096Mi
         limits:
           cpu: 500m
-          memory: 2048Mi
+          memory: 4096Mi
     # container docker for build & push images
     - name: docker
       image: docker:latest
