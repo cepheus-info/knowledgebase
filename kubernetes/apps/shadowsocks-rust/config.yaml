@@ -1,0 +1,15 @@
+servers:
+  - fast_open: true
+    method: aes-256-gcm
+    mode: tcp_and_udp
+    password: opensuse
+    server:
+      - "::"
+      - 127.0.0.1
+    server_port: 8388
+    service_port: 32001
+    plugin: v2ray-plugin
+    # Note: if you need to use tls for ssserver directly,
+    # Replace with plugin_opts: server;path=/magic;tls;host=proxy.cepheus.info;cert=/etc/cert/fullchain.pem;key=/etc/cert/privkey.pem
+    # And the certificate should be chmod a+r first
+    plugin_opts: server;path=/magic

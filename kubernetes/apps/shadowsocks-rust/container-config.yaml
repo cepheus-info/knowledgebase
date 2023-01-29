@@ -1,0 +1,12 @@
+metadata:
+  name: shadowsocks-rust
+  namespace: srt
+image:
+  image: ghcr.io/shadowsocks/ssserver-rust
+command:
+  - /bin/sh
+args:
+  - "-c"
+  - "sleep 99d"
+log_path: shadowsocks.0.log
+linux: {}

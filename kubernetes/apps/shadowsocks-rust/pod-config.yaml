@@ -1,0 +1,7 @@
+metadata:
+  name: shadowsocks-rust
+  namespace: srt
+  attempt: 1
+  uid: hdishd83djaidwnduwk28bcsd
+log_directory: /tmp
+linux: {}

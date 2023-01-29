@@ -1,0 +1,8 @@
+metadata:
+  name: gitversion
+image:
+  image: gittools/gitversion:5.11.1-alpine.3.13-6.0
+command:
+  - /tools/dotnet-gitversion
+log_path: gitversion.0.log
+linux: {}
