@@ -56,34 +56,35 @@ See [discussion here](https://discuss.kubernetes.io/t/inside-containers-mount-pa
 
 ### 3.2 Shadowsocks config
 
-#### 3.2.1 config.yaml
+#### 3.2.1 Prepare config.yaml
 
 Below is a sample config.yaml and some tips here:
 
 > service_port is the port which can be accessed externally, here we choose 32001 as we will bind a k8s service nodePort to 32001
+
 > plugin_opts will be passed to v2ray-plugin
 
 - If we want ss_client -> nginx(tls) -> ss_server, then we can just use:
 
-```yaml
-plugin_opts: server;path=/custom-virtual-path
-```
+  ```yaml
+  plugin_opts: server;path=/custom-virtual-path
+  ```
 
 - If we want ss_client -> ss_server(tls), then we need to use below config, and mount certificates into a specified location:
 
-```yaml
-plugin_opts: server;path=/custom-virtual-path;tls;host=domain-name;cert=/etc/cert/fullchain.pem;key=/etc/cert/privkey.pem
-```
+  ```yaml
+  plugin_opts: server;path=/custom-virtual-path;tls;host=domain-name;cert=/etc/cert/fullchain.pem;key=/etc/cert/privkey.pem
+  ```
 
-Please note the certificates should be chmod a+r first.
+  Please note the certificates should be chmod a+r first.
 
-```bash
-# This privkey.pem is obtained before we setup shadowsocks app.
-# Please refer to the nginx part to obtain a correct certificate
-chmod a+r /etc/cert/privkey.pem
-```
+  ```bash
+  # This privkey.pem is obtained before we setup shadowsocks app.
+  # Please refer to the nginx part to obtain a correct certificate
+  chmod a+r /etc/cert/privkey.pem
+  ```
 
-> The sample config.yaml
+> Full version of config.yaml
 
 ```yaml
 servers:
@@ -103,7 +104,7 @@ servers:
     plugin_opts: server;path=/custom-virtual-path
 ```
 
-#### 3.2.2 config.json
+#### 3.2.2 Convert config.yaml to config.json
 
 We can use yq command line tool to convert yaml to json
 
@@ -114,9 +115,9 @@ yq config.yaml --tojson > config.json
 yq --prettyPrint config.json > config.yaml
 ```
 
-### 3.3 Shadowsocks-rust.yaml
+### 3.3 Prepare shadowsocks-rust.yaml
 
-Below is a full kubernetes yaml with some tips here, note you can find an original version from [https://github.com/shadowsocks/shadowsocks-rust/blob/master/k8s/shadowsocks-rust.yaml](https://github.com/shadowsocks/shadowsocks-rust/blob/master/k8s/shadowsocks-rust.yaml)
+Below is a full kubernetes yaml with some tips stated, note you can find an original version from [https://github.com/shadowsocks/shadowsocks-rust/blob/master/k8s/shadowsocks-rust.yaml](https://github.com/shadowsocks/shadowsocks-rust/blob/master/k8s/shadowsocks-rust.yaml), and we made some proper changes to work correctly in our env.
 
 > The config.json in shadowsocks-rust.yaml is copied from above prepared json block
 
@@ -170,10 +171,10 @@ volumes:
       name: shadowsocks-rust
   - name: plugins
     hostPath:
-      path: /home/ubuntu/shadowsocks/bin
+      path: /home/shadowsocks/bin
 ```
 
-> Shadowsocks-rust.yaml
+> Full version of shadowsocks-rust.yaml
 
 ```yaml
 ---
@@ -273,7 +274,11 @@ spec:
             name: shadowsocks-rust
         - name: plugins
           hostPath:
-            path: /home/ubuntu/shadowsocks/bin
+            path: /home/shadowsocks/bin
+        # we should also create volume for certs if we use the ss_client -> ss_server(tls) topology
+        #- name: cert
+        #  hostPath:
+        #    path: /home/shadowsocks/cert
       initContainers:
         - name: plugin-downloader
           image: busybox
@@ -308,6 +313,8 @@ spec:
               readOnly: true
             - name: plugins
               mountPath: /usr/local/bin
+            - name: cert
+              mountPath: /etc/cert
           ports:
             - name: ss-8388
               containerPort: 8388
