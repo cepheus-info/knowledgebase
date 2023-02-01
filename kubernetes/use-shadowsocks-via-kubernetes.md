@@ -10,9 +10,15 @@ Shadowsocks is a popular solution to provide a proxy to access other network. Bu
 
 You can choose either CRI-O or Containerd as your container runtime, as they are both kubernetes compatible.
 
+> Note: you might not need this step if choosing other distribution such as k3s, microk8s, etc.
+
 ### 2.2 Install kubernetes environment
 
 For High performance servers & virtual machines, a full featured kubernetes cluster is recommended. For personal usage & testing purpose, a k3s single master environment is enough.
+
+See here [k3s Quick start](https://docs.k3s.io/quick-start) for more information about install k3s.
+
+> Note: If we are using k3s' default configuration, a LoadBalancer uses 80/443 will be created by default. But if we want to use nginx to listen on port 80/443, we should delete this LoadBalancer after installation or change the k3s LoadBalancer's configuration.
 
 ## 3. Guide to install shadowsocks
 
@@ -513,3 +519,4 @@ Install certbot as [https://certbot.eff.org/instructions](https://certbot.eff.or
 ## 4. Conclusion
 
 It's not that easy to run multiple individual components as a solution without neccesary experience and practices.
+But once we completed all these steps, it will be easier to have a much detailed vision of how a kubernetes deployment is working.

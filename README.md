@@ -23,3 +23,5 @@ A repository for architecture knowledge base.
 [Install CRI-O (安装 CRI-O 作为 Container Runtime)](./kubernetes/install-cri-o.md)
 
 [Install Alpine Linux on vmware (虚拟机安装 Alpine Linux)](./kubernetes/install-alpine-linux-on-vmware.md)
+
+[Bonus: Deploy shadowsocks-rust on kubernetes (部署 shadowsocks + v2ray-plugin + nginx)](./kubernetes/use-shadowsocks-via-kubernetes.md)
