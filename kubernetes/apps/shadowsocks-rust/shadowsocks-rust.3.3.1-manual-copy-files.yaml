@@ -32,11 +32,11 @@ data:
             "method": "aes-256-gcm",
             "mode": "tcp_and_udp",
             "password": "opensuse",
-            "server": ["::", "127.0.0.1"],
+            "server": "::",
             "server_port": 8388,
             "service_port": 32001,
             "plugin": "v2ray-plugin",
-            "plugin_opts": "server;path=/magic"
+            "plugin_opts": "server;path=/custom-virtual-path"
           }
         ]
     }
@@ -95,7 +95,11 @@ spec:
             name: shadowsocks-rust
         - name: plugins
           hostPath:
-            path: /home/ubuntu/shadowsocks/bin
+            path: /home/shadowsocks/bin
+        # we should also create volume for certs if we use the ss_client -> ss_server(tls) topology
+        #- name: cert
+        #  hostPath:
+        #    path: /home/shadowsocks/cert
       initContainers:
         - name: plugin-downloader
           image: busybox
@@ -130,8 +134,9 @@ spec:
               readOnly: true
             - name: plugins
               mountPath: /usr/local/bin
-            - name: cert
-              mountPath: /etc/cert
+            ## mount cert here if we use the ss_client -> ss_server(tls) topology
+            # - name: cert
+            #   mountPath: /etc/cert
           ports:
             - name: ss-8388
               containerPort: 8388

@@ -16,47 +16,9 @@ For High performance servers & virtual machines, a full featured kubernetes clus
 
 ## 3. Guide to install shadowsocks
 
-### 3.1 Copy neccesary files into a hostPath
+### 3.1 Shadowsocks config
 
-> Use below commands to create a temporary container and copy /usr/local/bin from docker container to local machine.
-
-```bash
-mkdir -p /home/shadowsocks
-# create tmp config.json
-cat <<EOF | sudo tee /home/shadowsocks/config.json
-{
-    "server": "localhost",
-    "server_port": 8388,
-    "password": "mypassword",
-    "method": "aes-256-gcm"
-}
-EOF
-# run tmp container
-docker run --name ssserver-rust \
-  --restart always \
-  -p 8388:8388/tcp \
-  -p 8388:8388/udp \
-  -v /home/shadowsocks/config.json:/etc/shadowsocks-rust/config.json \
-  -dit ghcr.io/shadowsocks/ssserver-rust:latest
-```
-
-Execute below command to copy:
-
-```bash
-# use docker cp to copy /usr/local/bin into /home/shadowsocks
-docker cp containerId:/usr/local/bin /home/shadowsocks
-```
-
-Note: The reason to run this step is that in kubernetes, if we mount a container directory to hostPath, then the contents created via Dockerfile's COPY command will be covered by that hostPath. It become an issue as we will mount /usr/local/bin to a plugins volume.
-The workaround here is use docker cp to manually copy these files into a hostPath.
-
-See [discussion here](https://discuss.kubernetes.io/t/inside-containers-mount-path-folder-no-file-present-only-lost-found-directory/9262/6) for more information.
-
-<i>You need to copy data into the volume. Whatever path you mount it on will be hidden inside your running container, regardless of whether your image has data there. Docker tries to be clever and copy files there, but Kubernetes does not - too many edge cases. You made a volume, you have to initialize it. Only you know what that really means for your app.</i>
-
-### 3.2 Shadowsocks config
-
-#### 3.2.1 Prepare config.yaml
+#### 3.1.1 Prepare config.yaml
 
 Below is a sample config.yaml and some tips here:
 
@@ -92,9 +54,7 @@ servers:
     method: aes-256-gcm
     mode: tcp_and_udp
     password: your_password
-    server:
-      - "::"
-      - 127.0.0.1
+    server: "::"
     server_port: 8388
     service_port: 32001
     plugin: v2ray-plugin
@@ -104,7 +64,7 @@ servers:
     plugin_opts: server;path=/custom-virtual-path
 ```
 
-#### 3.2.2 Convert config.yaml to config.json
+#### 3.1.2 Convert config.yaml to config.json
 
 We can use yq command line tool to convert yaml to json
 
@@ -115,11 +75,11 @@ yq config.yaml --tojson > config.json
 yq --prettyPrint config.json > config.yaml
 ```
 
-### 3.3 Prepare shadowsocks-rust.yaml
+### 3.2 Prepare shadowsocks-rust.yaml
 
 Below is a full kubernetes yaml with some tips stated, note you can find an original version from [https://github.com/shadowsocks/shadowsocks-rust/blob/master/k8s/shadowsocks-rust.yaml](https://github.com/shadowsocks/shadowsocks-rust/blob/master/k8s/shadowsocks-rust.yaml), and we made some proper changes to work correctly in our env.
 
-> The config.json in shadowsocks-rust.yaml is copied from above prepared json block
+> The ConfigMap => config.json in shadowsocks-rust.yaml is copied from above prepared json block
 
 > The service type is set as NodePort for convenience:
 
@@ -211,11 +171,11 @@ data:
             "method": "aes-256-gcm",
             "mode": "tcp_and_udp",
             "password": "opensuse",
-            "server": ["::", "127.0.0.1"],
+            "server": "::",
             "server_port": 8388,
             "service_port": 32001,
             "plugin": "v2ray-plugin",
-            "plugin_opts": "server;path=/custom-virtual-path;host=domain-name"
+            "plugin_opts": "server;path=/custom-virtual-path"
           }
         ]
     }
@@ -313,8 +273,9 @@ spec:
               readOnly: true
             - name: plugins
               mountPath: /usr/local/bin
-            - name: cert
-              mountPath: /etc/cert
+            ## mount cert here if we use the ss_client -> ss_server(tls) topology
+            # - name: cert
+            #   mountPath: /etc/cert
           ports:
             - name: ss-8388
               containerPort: 8388
@@ -358,6 +319,130 @@ spec:
       args: ["shadowsocks-rust:"]
   restartPolicy: Never
 ```
+
+### 3.3 Consideration of /usr/local/bin override
+
+If we decide to mount plugins directory, then we need to consider which path the plugins should use.
+
+By default, plugins are co-located with ssserver & docker-entrypoint.sh in container:/usr/local/bin as stated in Dockerfile.
+
+But if we mount /usr/local/bin as plugins volume, the contents from image (which are ssserver & docker-entrypoint.sh) would be overwritten by contents in the hostMachine. After that, an error would be occurred.
+
+```bash
+No such file or directory, cannot find docker-entrypoint.sh
+```
+
+The reason why it happened is that in kubernetes there is not such mechinism to merge a container's contents with mounted volumes as docker does. Only the contents at host machine would be kept.
+
+There are 2 ways to handle this problem as below.
+
+#### 3.3.1 Solution 1: Copy neccesary files into a hostPath
+
+> Use below commands to create a temporary container and copy /usr/local/bin from docker container to local machine.
+
+```bash
+mkdir -p /home/shadowsocks
+# create tmp config.json
+cat <<EOF | sudo tee /home/shadowsocks/config.json
+{
+    "server": "localhost",
+    "server_port": 8388,
+    "password": "mypassword",
+    "method": "aes-256-gcm"
+}
+EOF
+# run tmp container
+docker run --name ssserver-rust \
+  --restart always \
+  -p 8388:8388/tcp \
+  -p 8388:8388/udp \
+  -v /home/shadowsocks/config.json:/etc/shadowsocks-rust/config.json \
+  -dit ghcr.io/shadowsocks/ssserver-rust:latest
+```
+
+Execute below command to copy:
+
+```bash
+# use docker cp to copy /usr/local/bin into /home/shadowsocks
+docker cp containerId:/usr/local/bin /home/shadowsocks
+```
+
+Note: The reason to run this step is that in kubernetes, if we mount a container directory to hostPath, then the contents created via Dockerfile's COPY command will be covered by that hostPath. It become an issue as we will mount /usr/local/bin to a plugins volume.
+The workaround here is use docker cp to manually copy these files into a hostPath.
+
+See [discussion here](https://discuss.kubernetes.io/t/inside-containers-mount-path-folder-no-file-present-only-lost-found-directory/9262/6) for more information.
+
+<i>You need to copy data into the volume. Whatever path you mount it on will be hidden inside your running container, regardless of whether your image has data there. Docker tries to be clever and copy files there, but Kubernetes does not - too many edge cases. You made a volume, you have to initialize it. Only you know what that really means for your app.</i>
+
+#### 3.3.2 Solution 2: Change plugins mount path
+
+We can change plugins mount path to another one such as /usr/local/bin/plugins, and change the configMap to point to that location to find v2ray-plugin.
+
+- For config.yaml in [Prepare Config yaml](#311-prepare-configyaml) step:
+
+  > Change plugin property
+
+```yaml
+servers:
+  - fast_open: true
+    method: aes-256-gcm
+    mode: tcp_and_udp
+    password: your_password
+    server: "::"
+    server_port: 8388
+    service_port: 32001
+    # We should use absolute path now as /usr/local/bin/plugins is not in system path like /usr/local/bin
+    plugin: /usr/local/bin/plugins/v2ray-plugin
+    # Note: if you need to use tls for ssserver directly,
+    # Replace with plugin_opts: server;path=/custom-virtual-path;tls;host=domain-name;cert=/etc/cert/fullchain.pem;key=/etc/cert/privkey.pem
+    # And the certificate should be chmod a+r first
+    plugin_opts: server;path=/custom-virtual-path
+```
+
+- For shadowsocks-rust.yaml in [Prepare shadowsocks-rust yaml](#32-prepare-shadowsocks-rustyaml) step:
+
+  > Change plugins mount path
+
+  ```yaml
+  volumeMounts:
+    - name: plugins
+      # Change plugins mountPath to /usr/local/bin/plugins to avoid conflict
+      mountPath: /usr/local/bin/plugins
+  ```
+
+  > Change initContainers step
+
+  1. mkdir -p /usr/local/bin/plugins (Not sure if this is needed, as we've already mounted the path)
+  2. Replace /usr/local/bin with /usr/local/bin/plugins
+
+  ```yaml
+  initContainers:
+    - name: plugin-downloader
+      image: busybox
+      command:
+        - sh
+        - -c
+        - |
+          mkdir -p /usr/local/bin/plugins
+          TAG=$(wget -qO- https://api.github.com/repos/shadowsocks/v2ray-plugin/releases/latest | grep tag_name | cut -d '"' -f4)
+          wget https://github.com/shadowsocks/v2ray-plugin/releases/download/$TAG/v2ray-plugin-linux-amd64-$TAG.tar.gz
+          tar -xf *.gz
+          rm *.gz
+          mv v2ray* /usr/local/bin/plugins/v2ray-plugin
+          chmod +x /usr/local/bin/plugins/v2ray-plugin
+
+          TAG=$(wget -qO- https://api.github.com/repos/teddysun/xray-plugin/releases/latest | grep tag_name | cut -d '"' -f4)
+          wget https://github.com/teddysun/xray-plugin/releases/download/$TAG/xray-plugin-linux-amd64-$TAG.tar.gz
+          tar -xf *.gz
+          rm *.gz
+          mv xray* /usr/local/bin/plugins/xray-plugin
+          chmod +x /usr/local/bin/plugins/xray-plugin
+      volumeMounts:
+        - name: plugins
+          mountPath: /usr/local/bin/plugins
+  ```
+
+There is a full version of shadowsocks-rust.yaml for reference [shadowsocks-rust.3.3.2-changed-plugins-path.yaml](./apps/shadowsocks-rust/shadowsocks-rust.3.3.2-changed-plugins-path.yaml).
 
 ### 3.4 Apply shadowsocks-rust.yaml
 
