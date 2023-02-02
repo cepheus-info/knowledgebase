@@ -176,7 +176,7 @@ data:
             "fast_open": true,
             "method": "aes-256-gcm",
             "mode": "tcp_and_udp",
-            "password": "opensuse",
+            "password": "mypassword",
             "server": "::",
             "server_port": 8388,
             "service_port": 32001,
