@@ -221,7 +221,7 @@ The client code needed only simple changes with the AOP's help. And if we ignore
 
 Spring Data JPA provided the clear way to use Multiple Datasource & a Routing mechinism to achieve Database load balancing.
 We can find some other ways to , e.g.
-
+    
 - Hibernate focus on MultiTenantConnectionProvider and CurrentTenantIdentifierResolver (which is used by Quarkus framework).
 
 - In MongoDB, we are considering a Sharding-Key way because it's document based (This is like the Horizontal Seperation)

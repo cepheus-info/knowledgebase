@@ -127,7 +127,7 @@ public class DemoService {
 
 ## Create remote debug configuration in IDEA
 1. Choose Run -> Edit Configurations -> Add -> Remote Jvm Debug
-![Remote Debug Configuration](images/remote-debug-configuration.png)
+![Remote Debug Configuration](../assets/java/remote-debug-configuration.png)
 
 2. Set the port to 5005, and click OK
 

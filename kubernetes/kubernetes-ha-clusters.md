@@ -5,7 +5,7 @@
 We can setup kubernetes clusters with stacked control plane nodes. This approach requires less infrastructure. The etcd members and control plane nodes are co-located.
 
 The following diagram shows the architecture of a Kubernetes cluster with stacked control plane nodes.
-![HA with Stacked Control Plane Topology](images/kubernetes-cluster-stacked-control-plane-diagram.png)
+![HA with Stacked Control Plane Topology](../assets/kubernetes/kubernetes-cluster-stacked-control-plane-diagram.png)
 
 ## 2. Prerequisites
 
@@ -71,7 +71,7 @@ You can eighter install LoadBalancing Components externalized or stacked as well
 
 #### 4.1.1 External LoadBalancer
 
-![External LoadBalancer](images/external-loadbalancer.png)
+![External LoadBalancer](../assets/kubernetes/external-loadbalancer.png)
 
 > Pros
 
@@ -87,7 +87,7 @@ You can eighter install LoadBalancing Components externalized or stacked as well
 
 #### 4.1.2 Stacked LoadBalancer
 
-![Stacked LoadBalancer](images/stacked-loadbalancer.png)
+![Stacked LoadBalancer](../assets/kubernetes/stacked-loadbalancer.png)
 
 > Pros
 
@@ -107,7 +107,7 @@ As we cannot bind the same port twice, there would be a port conflict if we do n
 
 Thus you will need to run kubeadm init with --control-plane-endpoint dnsname:6444 command like this [kubeadm init --control-plane-endpoint](#kubeadmInitControlPlaneEndpoint)
 
-![](images/stack-port-conflict.png)
+![](../assets/kubernetes/stack-port-conflict.png)
 
 ### 4.2 Prepare LoadBalancer Configuration
 

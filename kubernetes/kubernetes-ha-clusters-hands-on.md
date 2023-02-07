@@ -37,7 +37,7 @@ top -c
 
 Note fedora need to enable remote connection manually. You can use a GUI tool in Settings -> Sharing -> Remote Login.
 
-![Fedora remote login](images/fedora-remote-login.png)
+![Fedora remote login](../assets/kubernetes/fedora-remote-login.png)
 
 ## 3. Install Container Runtime
 
@@ -304,7 +304,7 @@ Not sure above steps work on Fedora. You can try to disable ipv6 via `sysctl` co
 
 Disable ipv6 via GUI settings.
 
-![Disable ipv6 via GUI settings](images/fedora-disable-ipv6.png)
+![Disable ipv6 via GUI settings](../assets/kubernetes/fedora-disable-ipv6.png)
 
 ```bash
 sudo vi /etc/modprobe.d/disable-ipv6.conf
