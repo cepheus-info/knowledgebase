@@ -29,3 +29,7 @@ A repository for architecture knowledge base.
 ## Java
 
 [DataSource Read Write Seperation Via AOP (通过 AOP 实现数据源读写分离)](./java/spring-data-jpa-read-write-seperation-via-AOP.md)
+
+## Administration
+
+[Use git-get to organize and manage repositories（使用 git-get 管理（克隆、备份、恢复）本地代码仓库）](./administration/use-git-get-to-organize-repositories.md)
