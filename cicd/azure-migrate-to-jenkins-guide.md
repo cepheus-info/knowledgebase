@@ -366,7 +366,17 @@ http://182.150.31.33:32000/ <-> http://192.168.2.170:32000/
 
 ![Gitlab Webhook配置](images/gitlab-webhook.png)
 
-## 4. 结论
+## 4. 注意事项
+
+### 4.1 磁盘空间
+
+worker node 中会因为每一次 docker build 产生的镜像而占用较多的磁盘，需要定期执行清理任务。
+
+```bash
+docker system prune
+```
+
+## 5. 结论
 
 Azure DevOps 迁移至 Jenkins 的主要难度在于各个环节的逻辑需要自行理解清楚。
 
