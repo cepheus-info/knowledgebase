@@ -566,6 +566,52 @@ Warning  Unhealthy     3m26s (x2 over 3m26s)  kubelet            Readiness probe
 
 Calico needs auto detection for multiple ip address interface. Calico will detect the first available interface as the interface. So we need to configure a Virtual IP lower than the Real IP for ordering issue.
 
+### 6.8 Calico BIRD not ready
+
+> Senario:
+
+The service cannot be accessed via nodePort, but the related pods were running correctly.
+
+```bash
+  Warning  Unhealthy  13m (x2 over 13m)  kubelet            Readiness probe failed: calico/node is not ready: BIRD is not ready: Error querying BIRD: unable to connect to BIRDv4 socket: dial unix /var/run/calico/bird.ctl: connect: connection refused
+  Warning  Unhealthy  13m                kubelet            Readiness probe failed: 2023-02-22 01:33:46.419 [INFO][224] confd/health.go 180: Number of node(s) with BGP peering established = 3
+calico/node is not ready: BIRD is not ready: BGP not established with 172.22.0.1
+  Warning  Unhealthy  13m  kubelet  Readiness probe failed: 2023-02-22 01:33:56.462 [INFO][258] confd/health.go 180: Number of node(s) with BGP peering established = 3
+calico/node is not ready: BIRD is not ready: BGP not established with 172.22.0.1
+  Warning  Unhealthy  12m  kubelet  Readiness probe failed: 2023-02-22 01:34:06.416 [INFO][285] confd/health.go 180: Number of node(s) with BGP peering established = 3
+calico/node is not ready: BIRD is not ready: BGP not established with 172.22.0.1
+```
+
+This is because sometimes calico autodetect the wrong interface. So we need to modify the calico.yaml and add an IP_AUTODETECTION_METHOD with a regexp value, e.g. "interface=eth\*".
+
+1. Download the original calico.yaml from [https://raw.githubusercontent.com/projectcalico/calico/master/manifests/calico.yaml](https://raw.githubusercontent.com/projectcalico/calico/master/manifests/calico.yaml).
+
+The original config part is as below:
+
+```yaml
+# Auto-detect the BGP IP address.
+- name: IP
+  value: "autodetect"
+```
+
+2. Add IP_AUTODETECTION_METHOD with a proper value
+
+```yaml
+# Auto-detect the BGP IP address.
+- name: IP
+  value: "autodetect"
+- name: IP_AUTODETECTION_METHOD
+  value: "interface=eth*"
+```
+
+> Note: you should use ip address to confirm which interface name should be used (might be 'eth', 'ens', etc.).
+
+3. Use kubectl apply to use the new config
+
+```bash
+kubectl apply -f calico.yaml
+```
+
 ### 6.9 Calico tolerations
 
 ```bash
