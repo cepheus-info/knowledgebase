@@ -1,0 +1,45 @@
+version: "3.7"
+services:
+  kafka:
+    image: "bitnami/kafka:latest"
+    environment:
+      KAFKA_ENABLE_KRAFT: "yes"
+      KAFKA_CFG_PROCESS_ROLES: broker,controller
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_LISTENERS: CLIENT://:9092,EXTERNAL://:9093,CONTROLLER://:9094
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CFG_ADVERTISED_LISTENERS: CLIENT://kafka:9092,EXTERNAL://10.39.1.225:9093
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: CLIENT
+      KAFKA_BROKER_ID: 1
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@127.0.0.1:9094
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+    volumes:
+      - kafka:/bitnami/kafka
+    networks:
+      SMSO:
+        aliases:
+          - kafka
+    ports:
+      - 9092:9092
+      - 9093:9093
+      - 9094:9094
+
+  kafdrop:
+    image: obsidiandynamics/kafdrop
+    restart: "no"
+    environment:
+      KAFKA_BROKERCONNECT: "kafka:9092"
+      JVM_OPTS: "-Xms16M -Xmx48M -Xss180K -XX:-TieredCompilation -XX:+UseStringDeduplication -noverify"
+    depends_on:
+      - "kafka"
+    networks:
+      SMSO:
+        aliases:
+          - kafdrop
+    ports:
+      - 9095:9000
+
+volumes:
+  kafka:
+networks:
+  KAFKA:
