@@ -45,7 +45,14 @@ podman images
 ### 4.1. Install Podman-compose
 
 ```powershell
+# On Windows, you can use the following command to install podman-compose.
 # Note that you need to install python3 first.
+pip install podman-compose
+```
+
+```bash
+# On Linux (e.g. openSUSE), you can use the following command to install podman-compose.
+zypper install python3-pip
 pip install podman-compose
 ```
 

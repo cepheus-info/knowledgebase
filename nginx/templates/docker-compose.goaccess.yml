@@ -1,0 +1,22 @@
+version: "3.7"
+services:
+  goaccess:
+    image: allinurl/goaccess
+    container_name: goaccess
+    restart: always
+    ports:
+      - 7890:7890
+    volumes:
+      - /var/log/nginx/access.log:/goaccess/log/nginx/access.log:ro
+      - public_html:/goaccess/www/html:rw
+    command: -f /goaccess/log/nginx/access.log -o /goaccess/www/html/index.html --log-format=COMBINED --real-time-html --ws-url=ws://localhost:7890
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: always
+    ports:
+      - 10080:80
+    volumes:
+      - public_html:/usr/share/nginx/html:ro
+volume:
+  public_html:
