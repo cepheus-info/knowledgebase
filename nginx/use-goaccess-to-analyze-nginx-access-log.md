@@ -1,4 +1,4 @@
-# Use GoAccess to analyze nginx log
+# Use GoAccess to analyze nginx access log
 
 ## Introduction
 
@@ -29,3 +29,41 @@ tail -F access.log | docker run -p 7890:7890 --rm -i -e LANG=$LANG allinurl/goac
 # Use Podman
 tail -F access.log | podman run -p 7890:7890 --rm -i -e LANG=$LANG allinurl/goaccess -a -o html --log-format COMBINED --real-time-html - > report.html
 ```
+
+## Use GoAccess via docker-compose / podman-compose
+
+### Docker-Compose file
+
+Refer to [docker-compose.goaccess.yml](./templates/docker-compose.goaccess.yml) for more information
+
+```yml
+version: "3.7"
+services:
+  goaccess:
+    image: allinurl/goaccess
+    container_name: goaccess
+    restart: always
+    ports:
+      - 7890:7890
+    volumes:
+      # Note the access.log host path, you should change it to your own path
+      - /var/log/nginx/access.log:/goaccess/log/nginx/access.log:ro
+      - public_html:/goaccess/www/html:rw
+    command: -f /goaccess/log/nginx/access.log -o /goaccess/www/html/index.html --log-format=COMBINED --real-time-html --ws-url=ws://localhost:7890
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: always
+    ports:
+      - 17080:80
+    volumes:
+      - public_html:/usr/share/nginx/html:ro
+volume:
+  public_html:
+```
+
+## Access GoAccess UI
+
+You can access the GoAccess UI via http://localhost:17080 now. And it's convenient to use a nginx server to proxy_pass the GoAccess UI.
+
+![GoAcess WebUI](../assets/nginx/go-access-ui.png)
