@@ -16,7 +16,7 @@ services:
     container_name: nginx
     restart: always
     ports:
-      - 10080:80
+      - 17080:80
     volumes:
       - public_html:/usr/share/nginx/html:ro
 volume:
