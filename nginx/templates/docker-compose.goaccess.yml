@@ -10,7 +10,9 @@ services:
       # Note the access.log host path, you should change it to your own path
       - /var/log/nginx/access.log:/goaccess/log/nginx/access.log:ro
       - public_html:/goaccess/www/html:rw
-    command: -f /goaccess/log/nginx/access.log -o /goaccess/www/html/index.html --log-format=COMBINED --real-time-html --ws-url=ws://localhost:7890
+    # Note the log-format, you should change it to your own log format
+    # command: -f /goaccess/log/nginx/access.log -o /goaccess/www/html/index.html --log-format=COMBINED --real-time-html --ws-url=ws://localhost:7890
+    command: -f /goaccess/log/nginx/access.log -o /goaccess/www/html/index.html --log-format='%h %^[%d:%t %^] "%r" %s %b "%R" "%u" "%^" %T %^ %^' --date-format='%d/%b/%Y' --time-format='%H:%M:%S' --tz='Asia/Shanghai' --real-time-html --ws-url=ws://localhost:7890
   nginx:
     image: nginx:alpine
     container_name: nginx

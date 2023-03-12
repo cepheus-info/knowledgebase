@@ -4,7 +4,26 @@
 
 [GoAccess](https://goaccess.io/) is a real-time web log analyzer and interactive viewer that runs in a terminal in \*nix systems or through your browser. It provides fast and valuable HTTP statistics for system administrators that require a visual server report on the fly.
 
+## Enable nginx response time
+
+```bash
+# Add the following line to your nginx.conf
+log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                  '$status $body_bytes_sent "$http_referer" '
+                  '"$http_user_agent" "$http_x_forwarded_for" '
+                  '$request_time $upstream_response_time $pipe';
+# Use below line to enable main log format, otherwise, the combined log format will be used
+access_log  /var/log/nginx/access.log  main;
+```
+
 ## Use GoAccess via Docker/Podman
+
+### GoAccess LOG_FORMAT
+
+```bash
+# use below log_format to parse nginx access log with response time
+%h %^[%d:%t %^] "%r" %s %b "%R" "%u" "%^" %T %^ %^
+```
 
 ### Execute GoAccess
 
@@ -35,6 +54,8 @@ tail -F access.log | podman run -p 7890:7890 --rm -i -e LANG=$LANG allinurl/goac
 ### Docker-Compose file
 
 Refer to [docker-compose.goaccess.yml](./templates/docker-compose.goaccess.yml) for more information
+
+You can change --log-format to your own log format as stated in [GoAccess LOG_FORMAT](#goaccess-log_format)
 
 ```yml
 version: "3.7"
