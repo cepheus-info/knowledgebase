@@ -514,6 +514,14 @@ Install certbot as [https://certbot.eff.org/instructions](https://certbot.eff.or
 }
 ```
 
+### 3.9 Guide to use BrdGrd(Bridege Guard) to hide your traffic
+
+Install BrdGrd on your server, and it causes clients to send smaller than usual packets.
+
+```bash
+# todo: add brdgrd install script
+```
+
 ## 4. Conclusion
 
 It's not that easy to run multiple individual components as a solution without neccesary experience and practices.
