@@ -43,8 +43,10 @@ rootProject.name = 'multi-module-gradle-project-with-build-conventions'
 The build.gradle file of the root project is as follows(Optional, you can omit it if you can build the project without it):
 
 ```groovy
-group 'com.example'
-version '0.0.1-SNAPSHOT'
+allprojects {
+    group = 'com.example'
+    version = '0.0.1-SNAPSHOT'
+}
 ```
 
 ### 2.3. Sub projects
@@ -75,14 +77,29 @@ repositories {
     gradlePluginPortal()
 }
 
+// Note: You can use the following to specify the version of the plugin,
+// as the version cannot be specified in the prebuilt script's pluginDsl block.
+// And you must specify the full name of the plugin packages in your repositories:
+// gradlePluginPortal() or mavenCentral()
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-gradle-plugin:2.7.9'
+    implementation 'org.springframework.boot:spring-boot-gradle-plugin:3.0.4'
     implementation 'io.spring.gradle:dependency-management-plugin:1.1.0'
-    // org.graalvm.buildtools.native is not available in the Gradle Plugin Portal so we need to use the Maven Central repository
-    // https://mvnrepository.com/artifact/org.graalvm.buildtools.native/org.graalvm.buildtools.native.gradle.plugin
+//     org.graalvm.buildtools.native is not available in the Gradle Plugin Portal so we need to use the Maven Central repository
+//     https://mvnrepository.com/artifact/org.graalvm.buildtools.native/org.graalvm.buildtools.native.gradle.plugin
     implementation 'org.graalvm.buildtools.native:org.graalvm.buildtools.native.gradle.plugin:0.9.18'
     implementation 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10'
 }
+
+//// Note: The following is not required if you are using script based plugin(e.g. my.conventions.gradle)
+//// instead of Class based plugin(e.g. MyConventionsPlugin.java)
+//gradlePlugin {
+//    plugins {
+//        buildConventions {
+//            id = 'com.example.build-conventions'
+//            implementationClass = 'com.example.BuildConventionsPlugin'
+//        }
+//    }
+//}
 ```
 
 > Note that the dependencies here are only for the plugins that are used in build conventions.
@@ -120,7 +137,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
 }
 
-tasks.named('test') {
+tasks.withType(Test).configureEach {
     ignoreFailures = true
     useJUnitPlatform()
 }
@@ -151,7 +168,7 @@ gradlePlugin {
     plugins {
         buildConventions {
             id = 'com.example.build-conventions'
-            implementationClass = 'com.example.buildconventions.BuildConventionsPlugin'
+            implementationClass = 'com.example.BuildConventionsPlugin'
         }
     }
 }
@@ -162,7 +179,7 @@ gradlePlugin {
 You can also define the plugin name in the `buildSrc/resources/META-INF/gradle-plugins/com.example.build-conventions.properties` file as follows:
 
 ```properties
-implementation-class=com.example.buildconventions.BuildConventionsPlugin
+implementation-class=com.example.BuildConventionsPlugin
 ```
 
 ## 4. Using build conventions
@@ -226,8 +243,14 @@ It's much more cleaner to organize your multi-module project with build-conventi
 
 ## 6. Reference
 
+See below links for more information:
+
 - [Gradle multi module project](https://docs.gradle.org/current/userguide/multi_project_builds.html)
 
 - [Gradle buildSrc](https://docs.gradle.org/current/userguide/organizing_gradle_projects.html#sec:build_sources)
 
 - [Custom Gradle Plugin](https://docs.gradle.org/current/userguide/custom_plugins.html)
+
+See below repository for the complete example:
+
+- [http://gitlab.sfdapp.com/generic/lab/smso-vnext.git](http://gitlab.sfdapp.com/generic/lab/smso-vnext.git)
