@@ -35,6 +35,13 @@ podTemplate(
 
         stage('Build') {
             container('node') {
+                /*
+                   Note: there is a bug that npm:reify:createSparse
+                   will take a long time which make npm install very slow
+                   The workaround is mkdir node_modules before exec npm install
+                   See [https://github.com/npm/cli/issues/3208](https://github.com/npm/cli/issues/3208) for more information
+                 */
+                sh 'mkdir node_modules'
                 sh "npm --no-git-tag-version version ${version}"
                 sh 'npm install concurrently -g'
                 sh 'npm install'

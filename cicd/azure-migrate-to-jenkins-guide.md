@@ -114,7 +114,7 @@ _执行位置: 本地 PC_
 
 > 注意: 此处以后端使用的配置文件为例说明，前端应当使用 templates/下的另外版本
 
-> pod.yaml
+#### 3.2.1 pod.yaml
 
 ```yaml
 apiVersion: v1
@@ -194,7 +194,7 @@ spec:
 - memory 单位 Mi, Gi 分别对应 MiB, GiB
 - 后端工程的.gradleHome 目录是根据工程名称来配置的，同一工程不能同时开启两次 build(目前仅挂载.gradleHome/下的 caches 目录也无法实现 gradle build 并行运行)
 
-> Jenkinsfile
+#### 3.2.2 Jenkinsfile
 
 以下 Jenkinsfile 使用的是 Scripted pipeline 的语法，应当与 Declarative pipeline 的语法区分开来。可浏览 Jenkins 官方文档了解更多语法相关特点。
 
@@ -270,6 +270,30 @@ podTemplate(
 
 - 需要注意替换 APP_VERSION 标识为 docker-compose.yml 中实际使用的标识，例如: SMSO_VERSION_TAG
 - 需要注意 gradlew build 命令增加的 -x test 参数，排除默认的 UnitTest
+
+#### 3.2.3 NPM cache consideration
+
+在使用 node 容器进行 npm install 安装依赖时，存在一个始终需要较长时间(> 500s)才能完成安装的 bug。如下图所示:
+
+![Take a long time to proceed npm install](../assets/cicd/long-time-npm-install.png)
+
+其原因是在执行 reify:createSparse 的过程中，耗费了异于寻常的时间。
+根据[https://github.com/npm/cli/issues/3208](https://github.com/npm/cli/issues/3208)中的描述，在 Jenkinsfile 中采用如下的 workaround 来解决该问题。在执行 npm install 之前先行创建 node_modules 文件夹，经测试，npm install 的总消耗时间由 600s 左右减少至了 120s 左右。
+
+```groovy
+stage('Build') {
+  container('node') {
+      /*
+          Note: there is a bug that npm:reify:createSparse
+          will take a long time which make npm install very slow
+          The workaround is mkdir node_modules before exec npm install
+          See [https://github.com/npm/cli/issues/3208](https://github.com/npm/cli/issues/3208) for more information
+        */
+      sh 'mkdir node_modules'
+      sh 'npm install'
+  }
+}
+```
 
 ### 3.3 准备 reference repository
 
