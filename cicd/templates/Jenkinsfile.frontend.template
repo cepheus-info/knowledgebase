@@ -33,27 +33,50 @@ podTemplate(
             currentBuild.displayName = "#${env.BUILD_ID} v${version}"
         }
 
-        stage('Build') {
+        stage('Install') {
             container('node') {
                 /*
                    Note: there is a bug that npm:reify:createSparse
                    will take a long time which make npm install very slow
                    The workaround is mkdir node_modules before exec npm install
-                   See [https://github.com/npm/cli/issues/3208](https://github.com/npm/cli/issues/3208) for more information
+                   See https://github.com/npm/cli/issues/3208 for more information
                  */
                 sh 'mkdir node_modules'
+
+                /* set the version in package.json with ${version} variable */
                 sh "npm --no-git-tag-version version ${version}"
+
+                /* use concurrently for multi-apps project, ignore it if it's single app */
                 sh 'npm install concurrently -g'
                 sh 'npm install'
+            }
+
+            always {
+                echo '========npm install finished========'
+            }
+            onFailure {
+                echo '========npm install execution failed========'
+            }
+        }
+
+        stage('Build') {
+            container('node') {
+                /* export CI=false for React apps, otherwise it will threat warnings as errors */
+                /*
+                   The -- after npm run build is needed
+                   as it represents the contents after it are arguments for the command
+                */
+                // sh 'export CI=false && npm run build -- --configuration=production'
+
                 /* groovylint-disable-next-line LineLength */
                 sh 'concurrently --kill-others-on-fail "npm run build -- qna-client --configuration=production" "npm run build -- qna-ops --configuration=production"'
             }
 
             always {
-                echo '========Gradle build finished========'
+                echo '========npm run build finished========'
             }
             onFailure {
-                echo '========Gradle build execution failed========'
+                echo '========npm run build execution failed========'
             }
         }
 

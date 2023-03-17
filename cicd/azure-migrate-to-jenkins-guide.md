@@ -194,7 +194,7 @@ spec:
 - memory 单位 Mi, Gi 分别对应 MiB, GiB
 - 后端工程的.gradleHome 目录是根据工程名称来配置的，同一工程不能同时开启两次 build(目前仅挂载.gradleHome/下的 caches 目录也无法实现 gradle build 并行运行)
 
-#### 3.2.2 Jenkinsfile
+#### 3.2.2 Jenkinsfile for gradle
 
 以下 Jenkinsfile 使用的是 Scripted pipeline 的语法，应当与 Declarative pipeline 的语法区分开来。可浏览 Jenkins 官方文档了解更多语法相关特点。
 
@@ -271,7 +271,50 @@ podTemplate(
 - 需要注意替换 APP_VERSION 标识为 docker-compose.yml 中实际使用的标识，例如: SMSO_VERSION_TAG
 - 需要注意 gradlew build 命令增加的 -x test 参数，排除默认的 UnitTest
 
-#### 3.2.3 NPM installation consideration
+#### 3.2.3 Jenkinsfile for nodejs
+
+```groovy
+stage('Install') {
+    container('node') {
+        /*
+            Note: there is a bug that npm:reify:createSparse
+            will take a long time which make npm install very slow
+            The workaround is mkdir node_modules before exec npm install
+            See https://github.com/npm/cli/issues/3208 for more information
+          */
+        sh 'mkdir node_modules'
+
+        /* set the version in package.json with ${version} variable */
+        sh "npm --no-git-tag-version version ${version}"
+
+        /* use concurrently for multi-apps project, ignore it if it's single app */
+        sh 'npm install concurrently -g'
+        sh 'npm install'
+    }
+}
+
+stage('Build') {
+    container('node') {
+        /* export CI=false for React apps, otherwise it will threat warnings as errors */
+        /*
+            The -- after npm run build is needed
+            as it represents the contents after it are arguments for the command
+        */
+        // sh 'export CI=false && npm run build -- --configuration=production'
+
+        /* groovylint-disable-next-line LineLength */
+        sh 'concurrently --kill-others-on-fail "npm run build -- qna-client --configuration=production" "npm run build -- qna-ops --configuration=production"'
+    }
+}
+```
+
+- 需要注意 npm install 命令之前需要先创建 node_modules 目录，否则会导致 npm install 执行时间过长，该问题在 npm 后续版本中可能会修复，详细分析参考 [npm install consideration](#324-npm-installation-consideration)
+- 需要注意构建过程被拆分成了 Install 和 Build 两个阶段，Install 阶段用于安装依赖，Build 阶段用于构建应用
+- npm version 用于设置 package.json 中的 version 字段，该字段将被用于应用程序中的版本号
+- concurrently 用于并行执行多个 npm run build 命令，例如: npm run build -- qna-client --configuration=production && npm run build -- qna-ops --configuration=production，项目需要根据实际情况进行确定是否需要使用该命令
+- React 应用需要设置 CI=false，否则会将警告视为错误，导致构建失败
+
+#### 3.2.4 NPM installation consideration
 
 在使用 node 容器进行 npm install 安装依赖时，存在一个始终需要较长时间(> 500s)才能完成安装的 bug。如下图所示:
 
