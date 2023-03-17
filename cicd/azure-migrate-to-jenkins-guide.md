@@ -271,7 +271,7 @@ podTemplate(
 - 需要注意替换 APP_VERSION 标识为 docker-compose.yml 中实际使用的标识，例如: SMSO_VERSION_TAG
 - 需要注意 gradlew build 命令增加的 -x test 参数，排除默认的 UnitTest
 
-#### 3.2.3 NPM cache consideration
+#### 3.2.3 NPM installation consideration
 
 在使用 node 容器进行 npm install 安装依赖时，存在一个始终需要较长时间(> 500s)才能完成安装的 bug。如下图所示:
 
@@ -291,6 +291,9 @@ stage('Build') {
         */
       sh 'mkdir node_modules'
       sh 'npm install'
+      /*
+        此处省略了其他代码
+      */
   }
 }
 ```
