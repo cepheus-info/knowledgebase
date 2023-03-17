@@ -40,7 +40,6 @@ spec:
       args:
         - "-c"
         - "chown 1000:1000 /root/.npm && sleep 99d"
-      runAsUser: root
       volumeMounts:
         # jenkins-npm for npm packages cache
         - name: jenkins-npm

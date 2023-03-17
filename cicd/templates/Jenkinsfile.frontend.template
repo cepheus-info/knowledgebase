@@ -40,8 +40,11 @@ podTemplate(
                    will take a long time which make npm install very slow
                    The workaround is mkdir node_modules before exec npm install
                    See https://github.com/npm/cli/issues/3208 for more information
-                 */
-                sh 'mkdir node_modules'
+                ------------------------------------------------------------------------------------------------
+                   Note: as mkdir will create a folder with root permission, we need to change the owner to node,
+                   which is the user that we use to run npm install, otherwise npm install will fail
+                */
+                sh 'mkdir node_modules && chown -R node:node node_modules'
 
                 /* set the version in package.json with ${version} variable */
                 sh "npm --no-git-tag-version version ${version}"

@@ -281,8 +281,11 @@ stage('Install') {
             will take a long time which make npm install very slow
             The workaround is mkdir node_modules before exec npm install
             See https://github.com/npm/cli/issues/3208 for more information
-          */
-        sh 'mkdir node_modules'
+        ------------------------------------------------------------------------------------------------
+            Note: as mkdir will create a folder with root permission, we need to change the owner to node,
+            which is the user that we use to run npm install, otherwise npm install will fail
+        */
+        sh 'mkdir node_modules && chown -R node:node node_modules'
 
         /* set the version in package.json with ${version} variable */
         sh "npm --no-git-tag-version version ${version}"
@@ -323,6 +326,8 @@ stage('Build') {
 其原因是在执行 reify:createSparse 的过程中，耗费了异于寻常的时间。
 根据[https://github.com/npm/cli/issues/3208](https://github.com/npm/cli/issues/3208)中的描述，在 Jenkinsfile 中采用如下的 workaround 来解决该问题。在执行 npm install 之前先行创建 node_modules 文件夹，经测试，npm install 的总消耗时间由 600s 左右减少至了 120s 左右。
 
+同时，因为 node_modules 文件夹是以 root 权限创建的，所以需要将 node_modules 文件夹的所有者改为 node，否则 npm install 会失败。
+
 ```groovy
 stage('Build') {
   container('node') {
@@ -330,9 +335,12 @@ stage('Build') {
           Note: there is a bug that npm:reify:createSparse
           will take a long time which make npm install very slow
           The workaround is mkdir node_modules before exec npm install
-          See [https://github.com/npm/cli/issues/3208](https://github.com/npm/cli/issues/3208) for more information
-        */
-      sh 'mkdir node_modules'
+          See https://github.com/npm/cli/issues/3208 for more information
+      ------------------------------------------------------------------------------------------------
+          Note: as mkdir will create a folder with root permission, we need to change the owner to node,
+          which is the user that we use to run npm install, otherwise npm install will fail
+      */
+      sh 'mkdir node_modules && chown -R node:node node_modules'
       sh 'npm install'
       /*
         此处省略了其他代码
