@@ -561,10 +561,14 @@ systemctl restart fail2ban
 #### 3.10.4 Check fail2ban status
 
 ```bash
-Use below command to view fail2ban status
+# Use below command to view fail2ban status
 fail2ban-client status
-Use below command to view fail2ban banned ip list
+# Use below command to view fail2ban banned ip list
 fail2ban-client get nginx-4xx banned
+# Use below command to mannually ban ip address
+fail2ban-client set nginx-4xx banip <ip-address>
+# Use below command to unban ip address(in all jails and database)
+fail2ban-client unban <ip-address>
 ```
 
 ## 4. Conclusion
