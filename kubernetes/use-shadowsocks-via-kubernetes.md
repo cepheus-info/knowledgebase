@@ -571,6 +571,12 @@ fail2ban-client set nginx-4xx banip <ip-address>
 fail2ban-client unban <ip-address>
 ```
 
+#### 3.10.5 Use Hellpot to trick hackers
+
+Hellpot is a honeypot that can be used to trick hackers. It can be used to detect hackers and block their ip address.
+
+See [https://github.com/yunginnanet/HellPot](https://github.com/yunginnanet/HellPot) for more details.
+
 ## 4. Conclusion
 
 It's not that easy to run multiple individual components as a solution without neccesary experience and practices.
