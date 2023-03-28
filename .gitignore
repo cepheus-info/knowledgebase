@@ -1,7 +1,8 @@
-linux/
-mongodb/
-security/
 writings/
 100-days-challenge.*
 *.pdf
 tmp/
+*.xlsx
+*.xls
+*.doc
+*.docx

@@ -1,0 +1,414 @@
+{
+    "activeProfiles": [
+        "alpha"
+    ],
+    "propertySources": [
+        {
+            "name": "server.ports",
+            "properties": {
+                "local.server.port": {
+                    "value": 8080
+                }
+            }
+        },
+        {
+            "name": "servletContextInitParams",
+            "properties": {}
+        },
+        {
+            "name": "systemProperties",
+            "properties": {
+                "awt.toolkit": {
+                    "value": "sun.awt.X11.XToolkit"
+                },
+                "java.specification.version": {
+                    "value": "11"
+                },
+                "sun.cpu.isalist": {
+                    "value": ""
+                },
+                "sun.jnu.encoding": {
+                    "value": "UTF-8"
+                },
+                "java.class.path": {
+                    "value": "smso_measure_service.jar"
+                },
+                "java.vm.vendor": {
+                    "value": "Debian"
+                },
+                "sun.arch.data.model": {
+                    "value": "64"
+                },
+                "java.vendor.url": {
+                    "value": "https://tracker.debian.org/openjdk-11"
+                },
+                "catalina.useNaming": {
+                    "value": "false"
+                },
+                "user.timezone": {
+                    "value": "GMT"
+                },
+                "os.name": {
+                    "value": "Linux"
+                },
+                "java.vm.specification.version": {
+                    "value": "11"
+                },
+                "sun.java.launcher": {
+                    "value": "SUN_STANDARD"
+                },
+                "sun.boot.library.path": {
+                    "value": "/usr/lib/jvm/java-11-openjdk-amd64/lib"
+                },
+                "sun.java.command": {
+                    "value": "******"
+                },
+                "jdk.debug": {
+                    "value": "release"
+                },
+                "sun.cpu.endian": {
+                    "value": "little"
+                },
+                "user.home": {
+                    "value": "/root"
+                },
+                "user.language": {
+                    "value": "en"
+                },
+                "java.specification.vendor": {
+                    "value": "Oracle Corporation"
+                },
+                "java.version.date": {
+                    "value": "2022-01-18"
+                },
+                "java.home": {
+                    "value": "/usr/lib/jvm/java-11-openjdk-amd64"
+                },
+                "file.separator": {
+                    "value": "/"
+                },
+                "java.vm.compressedOopsMode": {
+                    "value": "32-bit"
+                },
+                "line.separator": {
+                    "value": "\n"
+                },
+                "java.specification.name": {
+                    "value": "Java Platform API Specification"
+                },
+                "java.vm.specification.vendor": {
+                    "value": "Oracle Corporation"
+                },
+                "java.awt.graphicsenv": {
+                    "value": "sun.awt.X11GraphicsEnvironment"
+                },
+                "java.awt.headless": {
+                    "value": "true"
+                },
+                "java.protocol.handler.pkgs": {
+                    "value": "org.springframework.boot.loader"
+                },
+                "sun.management.compiler": {
+                    "value": "HotSpot 64-Bit Tiered Compilers"
+                },
+                "java.runtime.version": {
+                    "value": "11.0.14+9-post-Debian-1deb11u1"
+                },
+                "user.name": {
+                    "value": "root"
+                },
+                "path.separator": {
+                    "value": ":"
+                },
+                "os.version": {
+                    "value": "4.15.0-66-generic"
+                },
+                "java.runtime.name": {
+                    "value": "OpenJDK Runtime Environment"
+                },
+                "file.encoding": {
+                    "value": "UTF-8"
+                },
+                "spring.beaninfo.ignore": {
+                    "value": "true"
+                },
+                "java.vm.name": {
+                    "value": "OpenJDK 64-Bit Server VM"
+                },
+                "java.vendor.url.bug": {
+                    "value": "https://bugs.debian.org/openjdk-11"
+                },
+                "java.io.tmpdir": {
+                    "value": "/tmp"
+                },
+                "catalina.home": {
+                    "value": "/tmp/tomcat.17045006458434891673.8080"
+                },
+                "com.zaxxer.hikari.pool_number": {
+                    "value": "1"
+                },
+                "java.version": {
+                    "value": "11.0.14"
+                },
+                "user.dir": {
+                    "value": "/"
+                },
+                "os.arch": {
+                    "value": "amd64"
+                },
+                "java.vm.specification.name": {
+                    "value": "Java Virtual Machine Specification"
+                },
+                "PID": {
+                    "value": "1"
+                },
+                "java.awt.printerjob": {
+                    "value": "sun.print.PSPrinterJob"
+                },
+                "sun.os.patch.level": {
+                    "value": "unknown"
+                },
+                "catalina.base": {
+                    "value": "/tmp/tomcat.17045006458434891673.8080"
+                },
+                "java.library.path": {
+                    "value": "/usr/java/packages/lib:/usr/lib/x86_64-linux-gnu/jni:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/usr/lib/jni:/lib:/usr/lib"
+                },
+                "java.vm.info": {
+                    "value": "mixed mode"
+                },
+                "java.vendor": {
+                    "value": "Debian"
+                },
+                "java.vm.version": {
+                    "value": "11.0.14+9-post-Debian-1deb11u1"
+                },
+                "sun.io.unicode.encoding": {
+                    "value": "UnicodeLittle"
+                },
+                "java.class.version": {
+                    "value": "55.0"
+                }
+            }
+        },
+        {
+            "name": "systemEnvironment",
+            "properties": {
+                "PATH": {
+                    "value": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                    "origin": "System Environment Property \"PATH\""
+                },
+                "SSL_CERT_FILE": {
+                    "value": "/etc/ssl/certs/ca-certificates.crt",
+                    "origin": "System Environment Property \"SSL_CERT_FILE\""
+                },
+                "HOSTNAME": {
+                    "value": "4a924c3f9909",
+                    "origin": "System Environment Property \"HOSTNAME\""
+                },
+                "SPRING_DATASOURCE_URL": {
+                    "value": "jdbc:mysql://172.17.0.1:13306/smso_measure_service?useLegacyDatetimeCode=false&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false",
+                    "origin": "System Environment Property \"SPRING_DATASOURCE_URL\""
+                },
+                "SPRING_DATASOURCE_PASSWORD": {
+                    "value": "******",
+                    "origin": "System Environment Property \"SPRING_DATASOURCE_PASSWORD\""
+                },
+                "JAVA_TOOL_OPTIONS": {
+                    "value": "-Xms8m -Xmx256m",
+                    "origin": "System Environment Property \"JAVA_TOOL_OPTIONS\""
+                },
+                "SPRING_PROFILES_ACTIVE": {
+                    "value": "alpha",
+                    "origin": "System Environment Property \"SPRING_PROFILES_ACTIVE\""
+                },
+                "AXON_AXONSERVER_SERVERS": {
+                    "value": "axonserver:8124",
+                    "origin": "System Environment Property \"AXON_AXONSERVER_SERVERS\""
+                },
+                "SPRING_DATASOURCE_USERNAME": {
+                    "value": "smso_measure_service_user",
+                    "origin": "System Environment Property \"SPRING_DATASOURCE_USERNAME\""
+                },
+                "JAVA_VERSION": {
+                    "value": "11.0.14",
+                    "origin": "System Environment Property \"JAVA_VERSION\""
+                },
+                "LANG": {
+                    "value": "C.UTF-8",
+                    "origin": "System Environment Property \"LANG\""
+                },
+                "HOME": {
+                    "value": "/root",
+                    "origin": "System Environment Property \"HOME\""
+                }
+            }
+        },
+        {
+            "name": "applicationConfig: [classpath:/application-alpha.properties]",
+            "properties": {
+                "server.port": {
+                    "value": "8080",
+                    "origin": "class path resource [application-alpha.properties]:2:13"
+                },
+                "logging.level.root": {
+                    "value": "info",
+                    "origin": "class path resource [application-alpha.properties]:4:20"
+                }
+            }
+        },
+        {
+            "name": "applicationConfig: [classpath:/application.properties]",
+            "properties": {
+                "spring.main.allow-bean-definition-overriding": {
+                    "value": "true",
+                    "origin": "class path resource [application.properties]:2:46"
+                },
+                "spring.h2.console.enabled": {
+                    "value": "false",
+                    "origin": "class path resource [application.properties]:4:27"
+                },
+                "spring.datasource.driverClassName": {
+                    "value": "com.mysql.cj.jdbc.Driver",
+                    "origin": "class path resource [application.properties]:5:35"
+                },
+                "spring.jpa.hibernate.ddl-auto": {
+                    "value": "update",
+                    "origin": "class path resource [application.properties]:6:31"
+                },
+                "logging.level.org.hibernate.stat": {
+                    "value": "warn",
+                    "origin": "class path resource [application.properties]:9:34"
+                },
+                "logging.level.io.axoniq.demo": {
+                    "value": "warn",
+                    "origin": "class path resource [application.properties]:10:30"
+                },
+                "logging.level.org.springframework": {
+                    "value": "warn",
+                    "origin": "class path resource [application.properties]:11:35"
+                },
+                "logging.level.org.hibernate.SQL": {
+                    "value": "warn",
+                    "origin": "class path resource [application.properties]:12:33"
+                },
+                "logging.level.org.hibernate.type.descriptor.sql": {
+                    "value": "warn",
+                    "origin": "class path resource [application.properties]:13:49"
+                },
+                "spring.jpa.show-sql": {
+                    "value": "false",
+                    "origin": "class path resource [application.properties]:14:21"
+                },
+                "spring.jpa.properties.hibernate.format_sql": {
+                    "value": "false",
+                    "origin": "class path resource [application.properties]:15:44"
+                },
+                "spring.jpa.properties.javax.persistence.sharedCache.mode": {
+                    "value": "ENABLE_SELECTIVE",
+                    "origin": "class path resource [application.properties]:18:58"
+                },
+                "spring.jpa.properties.hibernate.cache.use_second_level_cache": {
+                    "value": "true",
+                    "origin": "class path resource [application.properties]:19:62"
+                },
+                "spring.jpa.properties.hibernate.cache.use_query_cache": {
+                    "value": "true",
+                    "origin": "class path resource [application.properties]:20:55"
+                },
+                "spring.jpa.properties.hibernate.cache.provider_class": {
+                    "value": "org.ehcache.jsr107.EhcacheCachingProvider",
+                    "origin": "class path resource [application.properties]:21:54"
+                },
+                "spring.jpa.properties.hibernate.cache.region.factory_class": {
+                    "value": "org.hibernate.cache.jcache.JCacheRegionFactory",
+                    "origin": "class path resource [application.properties]:22:60"
+                },
+                "net.sf.ehcache.configurationResourceName": {
+                    "value": "classpath:/ehcache.xml",
+                    "origin": "class path resource [application.properties]:23:42"
+                },
+                "hibernate.generate_statistics": {
+                    "value": "true",
+                    "origin": "class path resource [application.properties]:24:31"
+                },
+                "spring.cache.type": {
+                    "value": "simple",
+                    "origin": "class path resource [application.properties]:25:19"
+                },
+                "jwt.prefix": {
+                    "value": "Bearer ",
+                    "origin": "class path resource [application.properties]:28:12"
+                },
+                "jwt.header": {
+                    "value": "Authorization",
+                    "origin": "class path resource [application.properties]:29:12"
+                },
+                "jwt.secret": {
+                    "value": "******",
+                    "origin": "class path resource [application.properties]:30:12"
+                },
+                "jwt.expiration": {
+                    "value": "360000000",
+                    "origin": "class path resource [application.properties]:31:16"
+                },
+                "jwt.access_token_expiration": {
+                    "value": "360000000",
+                    "origin": "class path resource [application.properties]:32:29"
+                },
+                "jwt.refresh_token_expiration": {
+                    "value": "360000000",
+                    "origin": "class path resource [application.properties]:33:30"
+                },
+                "jwt.route.authentication.path": {
+                    "value": "api/auth/login",
+                    "origin": "class path resource [application.properties]:34:31"
+                },
+                "jwt.route.authentication.refresh": {
+                    "value": "api/auth/refresh",
+                    "origin": "class path resource [application.properties]:35:34"
+                },
+                "jwt.route.authentication.register": {
+                    "value": "api/auth/register",
+                    "origin": "class path resource [application.properties]:36:35"
+                },
+                "config.authentication.default_password": {
+                    "value": "******",
+                    "origin": "class path resource [application.properties]:37:40"
+                },
+                "jwt.role.prefix": {
+                    "value": "ROLE_",
+                    "origin": "class path resource [application.properties]:38:17"
+                },
+                "management.endpoint.metrics.enabled": {
+                    "value": "true",
+                    "origin": "class path resource [application.properties]:40:37"
+                },
+                "management.endpoint.caches.enabled": {
+                    "value": "true",
+                    "origin": "class path resource [application.properties]:41:36"
+                },
+                "management.endpoints.web.exposure.include": {
+                    "value": "*",
+                    "origin": "class path resource [application.properties]:42:43"
+                },
+                "management.endpoints.jmx.exposure.include": {
+                    "value": "*",
+                    "origin": "class path resource [application.properties]:43:43"
+                },
+                "spring.profiles.active": {
+                    "value": "local",
+                    "origin": "class path resource [application.properties]:45:24"
+                },
+                "spring.jackson.deserialization.read-unknown-enum-values-using-default-value": {
+                    "value": "true",
+                    "origin": "class path resource [application.properties]:50:77"
+                },
+                "logging.level.org.springframework.web.filter.CommonsRequestLoggingFilter": {
+                    "value": "DEBUG",
+                    "origin": "class path resource [application.properties]:51:74"
+                }
+            }
+        }
+    ]
+}

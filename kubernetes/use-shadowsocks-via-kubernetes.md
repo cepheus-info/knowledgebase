@@ -522,60 +522,9 @@ Install BrdGrd on your server, and it causes clients to send smaller than usual 
 # todo: add brdgrd install script
 ```
 
-### 3.10 Use fail2ban to protect your server
+### 3.10 Protect your server
 
-#### 3.10.1 Install fail2ban
-
-```bash
-zypper install fail2ban
-```
-
-#### 3.10.2 Configure fail2ban
-
-Add nginx-4xx.conf to /etc/fail2ban/filter.d directory
-
-```properties
-[Definition]
-failregex = ^<HOST>.*"(GET|POST|PATCH|PUT|DELETE|HEAD|OPTIONS|CONNECT|TRACE) .* HTTP/1\.[01]" (4\d\d|200) .*$
-```
-
-Change /etc/fail2ban/jail.conf
-
-```properties
-[nginx-4xx]
-enabled = true
-port = http,https
-filter = nginx-4xx
-logpath = /var/log/nginx/access.log
-findtime = 10
-maxretry = 3
-bantime = 3600
-```
-
-#### 3.10.3 Restart fail2ban
-
-```bash
-systemctl restart fail2ban
-```
-
-#### 3.10.4 Check fail2ban status
-
-```bash
-# Use below command to view fail2ban status
-fail2ban-client status
-# Use below command to view fail2ban banned ip list
-fail2ban-client get nginx-4xx banned
-# Use below command to mannually ban ip address
-fail2ban-client set nginx-4xx banip <ip-address>
-# Use below command to unban ip address(in all jails and database)
-fail2ban-client unban <ip-address>
-```
-
-#### 3.10.5 Use Hellpot to trick hackers
-
-Hellpot is a honeypot that can be used to trick hackers. It can be used to detect hackers and block their ip address.
-
-See [https://github.com/yunginnanet/HellPot](https://github.com/yunginnanet/HellPot) for more details.
+Refer to [Use fail2ban and Honeypot to secure your app server](../security/use-fail2ban-and-honeypot-to-secure-app-server.md) to protect your server.
 
 ## 4. Conclusion
 

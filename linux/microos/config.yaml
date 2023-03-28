@@ -1,0 +1,15 @@
+variant: fcos
+version: 1.0.0
+passwd:
+  users:
+    - name: root
+      password_hash: "$6$g8iwKKpGBSj2U5ju$HW/yfOLxR49MXwjo.ncGECja3SOE/MyqNySVz0gjqHCEHK8NmVoe6qKDAAZPd9fqsaO165.phVVKdJW4O5JFj1"
+      ssh_authorized_keys:
+        - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCotgkHZSiOqzGxDZyWxEeYnlVIAPs825LvfA5Z2HEjeVoYdfe+lPjjr5AWQiJEcmNS08UEg89YnN2QRAAvAqS94X1vm7wx1bF+wCM2hnFXqraJ+nhxBc7aH912B9+A4y+ue3kebfGjeqpWGKUtlJhBgNx/yj0zo9zs4psbU0Kn97jf740bmQ+8+gfnxmFz14C4KLT4S3QDgk9uk3WIXNr+3qcpwQyf9Qqt31CrDs1DJizlaCIalqoLSMGwLbSkBR724tfmJiVRkdGbbezJ/T+ffk0+bQof+oAxH/fFn/RBjP5uFja583X2I9fMbdZDCTUAbEz6VM2gwpmYCqTkAeMBnOVf//R4i1r2fONHG/DDgNlncEQlSLSUGEZ/dy63mc9CMbLgQqse+oP6m60S6Fs2HPBZUsXRotKO27qo8mCwP/yIcrDtokvJArSyXZnOp00ZDgXmAr5hpuTrcj9LwpoRihlgdLtX1TP07E9bw49k80LWyea3AXsvlMaCkns2yTc= wujuntaocn@outlook.com
+storage:
+  files:
+    - path: /etc/hostname
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: "worker2"
