@@ -16,6 +16,7 @@ Add below config into build.gradle for your Spring Boot applications. You can co
 
 ```groovy
 tasks.named('bootJar') {
+    // Note you cannot use launchScript() and layered() at the same time
     layered {
         enabled = true
         includeLayerTools = true
@@ -65,6 +66,12 @@ HEALTHCHECK --start-period=60s --interval=5s --retries=12 --timeout=5s CMD ["doc
 As Docker uses Layered File System, the network bandwidth is reduced when pushing the image to the registry.
 
 The startup time is also reduced as the dependencies are extracted into the image.
+
+![Docker layers before extraction](../assets/java/docker-layers-before-extraction.png)
+Above is the docker layers before extraction
+
+
+Above is the docker layers after extraction
 
 ## References
 

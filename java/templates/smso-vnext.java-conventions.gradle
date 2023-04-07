@@ -44,6 +44,7 @@ tasks.withType(Test).configureEach {
 }
 
 tasks.named('bootJar') {
+    // Note you cannot use launchScript() and layered() at the same time
     layered {
         enabled = true
         includeLayerTools = true
