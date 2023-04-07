@@ -1,0 +1,51 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
+//    id 'org.graalvm.buildtools.native'
+    id 'org.jetbrains.kotlin.jvm'
+//    id 'checkstyle'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+//checkstyle {
+//    maxWarnings = 0
+//}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+// https://mvnrepository.com/artifact/org.axonframework/axon-spring-boot-starter
+    implementation 'org.axonframework:axon-spring-boot-starter:4.7.1'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.14.2'
+    implementation 'jakarta.inject:jakarta.inject-api:1.0'
+
+// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-aop
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+}
+
+tasks.withType(Test).configureEach {
+    ignoreFailures = true
+    useJUnitPlatform()
+}
+
+tasks.named('bootJar') {
+    layered {
+        enabled = true
+        includeLayerTools = true
+    }
+}

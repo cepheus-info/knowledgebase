@@ -30,6 +30,8 @@ A repository for architecture knowledge base.
 
 [DataSource Read Write Seperation Via AOP (通过 AOP 实现数据源读写分离)](./java/spring-data-jpa-read-write-seperation-via-AOP.md)
 
+[Using Layered Jar to Achieve Efficient Docker Layers Generation (使用 Layered Jar 优化 Docker 镜像层)](./java/using-layered-jar-to-achieve-effecient-docker-layers-generation.md)
+
 ## Administration
 
 [Use git-get to organize and manage repositories（使用 git-get 管理（克隆、备份、恢复）本地代码仓库）](./administration/use-git-get-to-organize-repositories.md)
