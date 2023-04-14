@@ -110,7 +110,7 @@ Create or Edit /etc/crio/crio.conf.d/00-default.conf to reflect below contents:
 
 # The image used to instantiate infra containers.
 # This option supports live configuration reload.
-pause_image = "docker.io/k8simage/pause:3.8"
+pause_image = "docker.io/k8simage/pause:3.9"
 
 [crio.network]
 
@@ -497,6 +497,30 @@ cp /home/kubernetes/loadbalance/*.yaml /etc/kubernetes/manifests
 ```
 
 ## 7. Configure Kubernetes
+
+### 7.0 Consider pulling kubeadm config images mannually
+
+```bash
+# You can get a list of k8s base images via command below:
+kubeadm config images list --config kubeadm-config.yaml
+# You might get a list like this:
+docker.io/k8simage/kube-apiserver:v1.26.1
+docker.io/k8simage/kube-controller-manager:v1.26.1
+docker.io/k8simage/kube-scheduler:v1.26.1
+docker.io/k8simage/kube-proxy:v1.26.1
+docker.io/k8simage/pause:3.9
+docker.io/k8simage/etcd:3.5.6-0
+docker.io/k8simage/coredns:v1.9.3
+```
+
+```bash
+# Use below command to pull these images with credentials username & password
+kubeadm config images list --config kubeadm-config.yaml | xargs -I{} crictl pull --creds username:password {}
+# Or if you prepared a image list in a common-images.txt
+cat common-images.txt | xargs -I{} crictl pull --creds username:password {}
+```
+
+This step is because k8s.io cannot be reached without VPN connection, and it might exceeds the rate-limit for docker hub.
 
 ### 7.1 Init Kubernetes Cluster
 

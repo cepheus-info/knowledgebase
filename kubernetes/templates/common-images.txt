@@ -1,0 +1,13 @@
+docker.io/k8simage/kube-apiserver:v1.26.1
+docker.io/k8simage/kube-controller-manager:v1.26.1
+docker.io/k8simage/kube-scheduler:v1.26.1
+docker.io/k8simage/kube-proxy:v1.26.1
+docker.io/k8simage/pause:3.9
+docker.io/k8simage/etcd:3.5.6-0
+docker.io/k8simage/coredns:v1.9.3
+kubernetesui/dashboard:v2.6.1
+kubernetesui/metrics-scraper:v1.0.8
+kubesphere/nfs-subdir-external-provisioner:v4.0.2
+docker.io/gittools/gitversion:5.11.1-alpine.3.13-6.0
+docker.io/library/node:16.19.0-slim
+docker.io/jenkins/inbound-agent:4.10-3
