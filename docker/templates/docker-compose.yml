@@ -1,0 +1,18 @@
+version: "3.8"
+services:
+  backend:
+    image: imageName
+    container_name: containerName
+    deploy:
+      update_config:
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
