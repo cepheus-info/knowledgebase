@@ -126,13 +126,15 @@ This event is used to track the status of the processor. When a processor is idl
 public class ProcessorStatusEvent {
 
     private String processorId;
+    private String activityId;
     private boolean idle;
 
     public ProcessorStatusEvent() {
     }
 
-    public ProcessorStatusEvent(String processorId, boolean idle) {
+    public ProcessorStatusEvent(String processorId, String activityId, boolean idle) {
         this.processorId = processorId;
+        this.activityId = activityId;
         this.idle = idle;
     }
 
@@ -142,6 +144,14 @@ public class ProcessorStatusEvent {
 
     public void setProcessorId(String processorId) {
         this.processorId = processorId;
+    }
+
+    public String getActivityId() {
+        return activityId;
+    }
+
+    public void setActivityId(String activityId) {
+        this.activityId = activityId;
     }
 
     public boolean isIdle() {
@@ -162,11 +172,29 @@ public class ProcessorStatusEvent {
 }
 ```
 
+#### Create a Kafka Stream Binder
+
+We can use Spring cloud stream to create a Kafka Stream binder. We can define the Kafka Stream binder with the following code:
+
+```java
+public interface ProcessorStatusStream {
+
+    String INPUT = "processor-status-in";
+    String OUTPUT = "processor-status-out";
+
+    @Input(INPUT)
+    KStream<String, ProcessorStatusEvent> processorStatusIn();
+
+    @Output(OUTPUT)
+    KStream<String, ProcessorStatusEvent> processorStatusOut();
+}
+```
+
 #### 3.1.4. Step 4: Transform ActivityInitializedEvent Stream & ActivityCompletedEvent Stream to ProcessorStatusEvent Stream
 
 This stream is used to track the status of the processor. When a processor is idle, an event will be published to this stream. Otherwise, no event will be published to this stream. We will use Spring cloud stream to transform ActivityInitializedEvent Stream & ActivityCompletedEvent Stream to ProcessorStatusEvent Stream.
 
-Note: We can define a transformer with BiFunction<KStream<String, ActivityInitializedEvent>, KStream<String, ActivityCompletedEvent>, KStream<String, ProcessorStatusEvent>> transform() method. Each time when a new event is received from ActivityInitializedEvent Stream or ActivityCompletedEvent Stream, the transform() method will be called. We can use the received event to update the status of the processor. If the processor is idle, we can publish an event to ProcessorStatusEvent Stream. Otherwise, no event will be published to ProcessorStatusEvent Stream.
+Note: We can define a transformer with BiFunction<KStream<String, ActivityInitializedEvent>, KStream<String, ActivityCompletedEvent>, KStream<String, ProcessorStatusEvent>> transform() method. Each time when a new event is received from ActivityInitializedEvent Stream or ActivityCompletedEvent Stream, the transform() method will be called. We can use the received event to update the status of the processor.
 
 ```java
 @EnableBinding({ProcessorStatusStream.class, ActivityInitializedEventStream.class, ActivityCompletedEventStream.class})
@@ -181,6 +209,8 @@ public class ProcessorStatusEventTransformer {
                             ProcessorStatusEvent::new,
                             (key, value, aggregate) -> {
                                 aggregate.setProcessorId(value.getProcessorId());
+                                aggregate.setActivityId(value.getActivityId());
+                                aggregate.setIdle(false);
                                 return aggregate;
                             },
                             Materialized.with(Serdes.String(), new JsonSerde<>(ProcessorStatusEvent.class))
@@ -195,6 +225,8 @@ public class ProcessorStatusEventTransformer {
                             ProcessorStatusEvent::new,
                             (key, value, aggregate) -> {
                                 aggregate.setProcessorId(value.getProcessorId());
+                                aggregate.setActivityId(value.getActivityId());
+                                aggregate.setIdle(true);
                                 return aggregate;
                             },
                             Materialized.with(Serdes.String(), new JsonSerde<>(ProcessorStatusEvent.class))
@@ -202,8 +234,14 @@ public class ProcessorStatusEventTransformer {
                     .toStream()
                     .map((key, value) -> new KeyValue<>(key, value));
 
+            // Merge the Processor Status Event Stream
             return processorStatusEventStream.merge(processorStatusEventStream2);
         };
+    }
+
+    @Bean
+    public Consumer<KStream<String, ProcessorStatusEvent>> process(@Autowired ProcessorStatusTracker processorStatusTracker) {
+        return processorStatusEventStream -> processorStatusEventStream.foreach((key, value) -> processorStatusTracker.handleProcessorStatusEvent(value));
     }
 }
 ```
@@ -218,15 +256,12 @@ public class ProcessorStatusTracker {
 
         private static final Logger LOGGER = LoggerFactory.getLogger(ProcessorStatusTracker.class);
 
-        private final ProcessorStatusStream processorStatusStream;
-
         private final Map<String, Boolean> processorStatusMap = new ConcurrentHashMap<>();
 
-        public ProcessorStatusTracker(ProcessorStatusStream processorStatusStream) {
-            this.processorStatusStream = processorStatusStream;
+        public ProcessorStatusTracker() {
+
         }
 
-        @StreamListener(ProcessorStatusStream.INPUT)
         public void handleProcessorStatusEvent(ProcessorStatusEvent event) {
             LOGGER.info("Received processor status event: {}", event);
             processorStatusMap.put(event.getProcessorId(), event.isIdle());
@@ -238,6 +273,46 @@ public class ProcessorStatusTracker {
 }
 ```
 
+We need to aggregate all the Processor Status Events bind to the same processor to get the latest Processor Status Event. So we will change the ProcessorStatusTracker to group the Processor Status Events by processorId. Each ProcessorId will have multiple associated ActivityId and Idle status. To determine isIdle for processorId, we will check if all the associated ActivityId are idle. We want to use Map<String, Map<String, Boolean>> processorStatusMap to store the Processor Status Events. But the Map<String, Map<String, Boolean>> processorStatusMap is not thread safe. So we will use ConcurrentHashMap<String, Map<String, Boolean>> processorStatusMap to store the Processor Status Events.
+
+    ```java
+    @Component
+    public class ProcessorStatusTracker {
+
+        private static final Logger LOGGER = LoggerFactory.getLogger(ProcessorStatusTracker.class);
+
+        private final Map<String, Map<String, Boolean>> processorStatusMap = new ConcurrentHashMap<>();
+
+        public ProcessorStatusTracker() {
+
+        }
+
+        @StreamListener(ProcessorStatusStream.INPUT)
+        public void handleProcessorStatusEvent(ProcessorStatusEvent event) {
+            LOGGER.info("Received processor status event: {}", event);
+            processorStatusMap.compute(event.getProcessorId(), (processorId, activityStatusMap) -> {
+                if (activityStatusMap == null) {
+                    activityStatusMap = new ConcurrentHashMap<>();
+                }
+                activityStatusMap.put(event.getActivityId(), event.isIdle());
+                // to clean up the activityStatusMap, we will remove the activityStatusMap if all the activities are idle
+                if (activityStatusMap.values().stream().allMatch(idle -> idle)) {
+                    return null;
+                }
+                return activityStatusMap;
+            });
+        }
+
+        public boolean isIdle(String processorId) {
+            Map<String, Boolean> activityStatusMap = processorStatusMap.get(processorId);
+            if (activityStatusMap == null || activityStatusMap.isEmpty()) {
+                return true;
+            }
+            return activityStatusMap.values().stream().allMatch(idle -> idle);
+        }
+    }
+    ```
+
 But there is another problem. When an ActivityInitializedEvent emits in a short period after idle, we'd rather not start a new processing. So we will need configure the ProcessorStatusTracker to ensure that the processor is idle for a period of time before starting a new processing.
 
 ```java
@@ -246,7 +321,57 @@ public class ProcessorStatusTracker {
 
         private static final Logger LOGGER = LoggerFactory.getLogger(ProcessorStatusTracker.class);
 
-        private final ProcessorStatusStream processorStatusStream;
+        private final Map<String, Map<String, Boolean>> processorStatusMap = new ConcurrentHashMap<>();
+
+        private final Map<String, Long> processorStatusTimestampMap = new ConcurrentHashMap<>();
+
+        private final long idleTime;
+
+        public ProcessorStatusTracker(@Value("${processor.idle.time}") long idleTime) {
+            this.idleTime = idleTime;
+        }
+
+        public void handleProcessorStatusEvent(ProcessorStatusEvent event) {
+            LOGGER.info("Received processor status event: {}", event);
+            processorStatusMap.compute(event.getProcessorId(), (processorId, activityStatusMap) -> {
+                if (activityStatusMap == null) {
+                    activityStatusMap = new ConcurrentHashMap<>();
+                }
+                activityStatusMap.put(event.getActivityId(), event.isIdle());
+                // to clean up the activityStatusMap, we will remove the activityStatusMap if all the activities are idle
+                if (activityStatusMap.values().stream().allMatch(idle -> idle)) {
+                    return null;
+                }
+                return activityStatusMap;
+            });
+            // Update the timestamp of the processor at the first time when the processor become idle
+            if(event.isIdle()) {
+                processorStatusTimestampMap.putIfAbsent(event.getProcessorId(), System.currentTimeMillis());
+            }
+        }
+
+        public boolean isIdle(String processorId) {
+            Map<String, Boolean> activityStatusMap = processorStatusMap.get(processorId);
+            if (activityStatusMap == null || activityStatusMap.isEmpty()) {
+                return true;
+            }
+            // Check if the processor is idle for a period of time
+            Long timestamp = processorStatusTimestampMap.get(processorId);
+            if(timestamp == null) {
+                return false;
+            }
+            return System.currentTimeMillis() - timestamp > idleTime;
+        }
+}
+```
+
+Another component do not consider the activity status is as below:
+
+```java
+@Component
+public class ProcessorStatusTracker {
+
+        private static final Logger LOGGER = LoggerFactory.getLogger(ProcessorStatusTracker.class);
 
         private final Map<String, Boolean> processorStatusMap = new ConcurrentHashMap<>();
 
@@ -254,12 +379,10 @@ public class ProcessorStatusTracker {
 
         private final long idleTime;
 
-        public ProcessorStatusTracker(ProcessorStatusStream processorStatusStream, @Value("${processor.idle.time}") long idleTime) {
-            this.processorStatusStream = processorStatusStream;
+        public ProcessorStatusTracker(@Value("${processor.idle.time}") long idleTime) {
             this.idleTime = idleTime;
         }
 
-        @StreamListener(ProcessorStatusStream.INPUT)
         public void handleProcessorStatusEvent(ProcessorStatusEvent event) {
             LOGGER.info("Received processor status event: {}", event);
             processorStatusMap.put(event.getProcessorId(), event.isIdle());
@@ -298,61 +421,98 @@ public class ProcessorStatusTracker {
 
 #### 3.1.6. Step 6: Unit Test for ProcessorStatusTracker
 
+As EnableBinding and StreamListener are deprecated, we will use a functional style to implement the ProcessorStatusStream.
+
+Unit Test via KafkaTemplate to send the ProcessorStatusEvent to the Spring Cloud Stream.
+
 ```java
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
+@EmbeddedKafka(partitions = 1, topics = {ProcessorStatusStream.INPUT})
 public class ProcessorStatusTrackerTest {
+
+    @Autowired
+    private KafkaTemplate<String, ProcessorStatusEvent> kafkaTemplate;
 
     @Autowired
     private ProcessorStatusTracker processorStatusTracker;
 
-    @Autowired
-    private ProcessorStatusStream processorStatusStream;
-
     @Test
-    public void testIsIdle() {
+    public void testProcessorStatusTracker() throws InterruptedException {
         String processorId = "processor-1";
-        Assert.assertTrue(processorStatusTracker.isIdle(processorId));
-
-        processorStatusStream.output().send(MessageBuilder.withPayload(new ProcessorStatusEvent(processorId, false)).build());
-        Assert.assertFalse(processorStatusTracker.isIdle(processorId));
-
-        processorStatusStream.output().send(MessageBuilder.withPayload(new ProcessorStatusEvent(processorId, true)).build());
-        Assert.assertTrue(processorStatusTracker.isIdle(processorId));
+        String activityId = "activity-1";
+        ProcessorStatusEvent processorStatusEvent = new ProcessorStatusEvent(processorId, activityId, true);
+        kafkaTemplate.send(ProcessorStatusStream.INPUT, processorStatusEvent);
+        Thread.sleep(1000);
+        assertTrue(processorStatusTracker.isIdle(processorId));
     }
 
+    // test the processor is not idle if the activity is not idle
     @Test
-    public void testIsBusyWhenActivityInitialized() {
+    public void testProcessorStatusTracker2() throws InterruptedException {
         String processorId = "processor-1";
-        Assert.assertTrue(processorStatusTracker.isIdle(processorId));
-
-        processorStatusStream.output().send(MessageBuilder.withPayload(new ProcessorStatusEvent(processorId, false)).build());
-        Assert.assertFalse(processorStatusTracker.isIdle(processorId));
-
-        processorStatusStream.output().send(MessageBuilder.withPayload(new ProcessorStatusEvent(processorId, true)).build());
-        Assert.assertTrue(processorStatusTracker.isIdle(processorId));
-
-        // If the processor is idle for a period of time, it will be busy when an ActivityInitializedEvent emits
-        processorStatusStream.output().send(MessageBuilder.withPayload(new ActivityInitializedEvent(processorId, "activity-1")).build());
-        Assert.assertFalse(processorStatusTracker.isIdle(processorId));
+        String activityId = "activity-1";
+        ProcessorStatusEvent processorStatusEvent = new ProcessorStatusEvent(processorId, activityId, false);
+        kafkaTemplate.send(ProcessorStatusStream.INPUT, processorStatusEvent);
+        Thread.sleep(1000);
+        assertFalse(processorStatusTracker.isIdle(processorId));
     }
 
-    @Test()
-    public void testIsBusyWhenActivityCompleted() {
+    // test the processor is not idle if the activity is idle but the processor is not idle for a period of time
+    @Test
+    public void testProcessorStatusTracker3() throws InterruptedException {
         String processorId = "processor-1";
-        Assert.assertTrue(processorStatusTracker.isIdle(processorId));
+        String activityId = "activity-1";
+        ProcessorStatusEvent processorStatusEvent = new ProcessorStatusEvent(processorId, activityId, true);
+        kafkaTemplate.send(ProcessorStatusStream.INPUT, processorStatusEvent);
+        Thread.sleep(1000);
+        assertFalse(processorStatusTracker.isIdle(processorId));
+    }
 
-        processorStatusStream.output().send(MessageBuilder.withPayload(new ProcessorStatusEvent(processorId, false)).build());
-        Assert.assertFalse(processorStatusTracker.isIdle(processorId));
+    // test the processor is idle if the activity is idle and the processor is idle for a period of time
+    @Test
+    public void testProcessorStatusTracker4() throws InterruptedException {
+        String processorId = "processor-1";
+        String activityId = "activity-1";
+        ProcessorStatusEvent processorStatusEvent = new ProcessorStatusEvent(processorId, activityId, true);
+        kafkaTemplate.send(ProcessorStatusStream.INPUT, processorStatusEvent);
+        Thread.sleep(1000);
+        assertTrue(processorStatusTracker.isIdle(processorId));
+    }
 
-        processorStatusStream.output().send(MessageBuilder.withPayload(new ProcessorStatusEvent(processorId, true)).build());
-        Assert.assertTrue(processorStatusTracker.isIdle(processorId));
+    // test the processor is not idle if one of the activities is not idle
+    @Test
+    public void testProcessorStatusTracker5() throws InterruptedException {
+        String processorId = "processor-1";
+        String activityId1 = "activity-1";
+        String activityId2 = "activity-2";
+        ProcessorStatusEvent processorStatusEvent1 = new ProcessorStatusEvent(processorId, activityId1, true);
+        ProcessorStatusEvent processorStatusEvent2 = new ProcessorStatusEvent(processorId, activityId2, false);
+        kafkaTemplate.send(ProcessorStatusStream.INPUT, processorStatusEvent1);
+        kafkaTemplate.send(ProcessorStatusStream.INPUT, processorStatusEvent2);
+        Thread.sleep(1000);
+        assertFalse(processorStatusTracker.isIdle(processorId));
+    }
 
-        // If the processor is idle for a period of time, it will be busy when an ActivityCompletedEvent emits
-        processorStatusStream.output().send(MessageBuilder.withPayload(new ActivityCompletedEvent(processorId, "activity-1")).build());
-        Assert.assertTrue(processorStatusTracker.isIdle(processorId));
+    // test via ActivityInitializedEvent & ActivityCompletedEvent
+    @Test
+    public void testProcessorStatusTracker6() throws InterruptedException {
+        String processorId = "processor-1";
+        String activityId = "activity-1";
+        ActivityInitializedEvent activityInitializedEvent = new ActivityInitializedEvent(processorId, activityId);
+        ActivityCompletedEvent activityCompletedEvent = new ActivityCompletedEvent(processorId, activityId);
+        kafkaTemplate.send(ActivityInitializedStream.INPUT, activityInitializedEvent);
+        kafkaTemplate.send(ActivityCompletedStream.INPUT, activityCompletedEvent);
+        Thread.sleep(1000);
+        assertTrue(processorStatusTracker.isIdle(processorId));
     }
 }
+```
+
+Since @EmbeddedKafka is in used, we need to add the following dependency in the build.gradle.
+
+```groovy
+testImplementation 'org.springframework.kafka:spring-kafka-test'
 ```
 
 ### 3.2. Optimizing the usage of the Processor Tracker via AOP
