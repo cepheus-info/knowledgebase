@@ -54,3 +54,4 @@ echo the output file is: $output
 
 # Previous way to filter images and docker save
 # docker image ls | grep $version | awk '{print $1":"$2}' | xargs docker save | gzip > $output
+# scp $output root@<ip>:/root
