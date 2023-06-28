@@ -1,10 +1,10 @@
 # There are m men and w women, choose n person and at least k person are men, implement a function to get the number of all the possible combinations.
 
-# Example:
+- Example:
 
-# Input: m = 2, w = 2, n = 3, k = 1
+- Input: m = 2, w = 2, n = 3, k = 1
 
-# Output: 4
+- Output: 4
 
 The possible combinations are:
 (m1, m2, w1), (m1, m2, w2), (m1, w1, w2), (m2, w1, w2)
