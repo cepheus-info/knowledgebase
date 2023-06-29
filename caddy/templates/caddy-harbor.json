@@ -1,0 +1,83 @@
+{
+    "apps": {
+        "http": {
+            "http_port": 2180,
+            "https_port": 2143,
+            "servers": {
+                "srv0": {
+                    "listen": [
+                        ":2143"
+                    ],
+                    "routes": [
+                        {
+                            "match": [
+                                {
+                                    "host": [
+                                        "harbor.sfdapp.com"
+                                    ]
+                                }
+                            ],
+                            "handle": [
+                                {
+                                    "handler": "subroute",
+                                    "routes": [
+                                        {
+                                            "handle": [
+                                                {
+                                                    "handler": "reverse_proxy",
+                                                    "upstreams": [
+                                                        {
+                                                            "dial": "192.168.2.194:48024"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "terminal": true
+                        }
+                    ]
+                }
+            }
+        },
+        "tls": {
+            "automation": {
+                "policies": [
+                    {
+                        "subjects": [
+                            "harbor.sfdapp.com"
+                        ],
+                        "issuers": [
+                            {
+                                "challenges": {
+                                    "dns": {
+                                        "provider": {
+                                            "access_key_id": "",
+                                            "access_key_secret": "",
+                                            "name": "alidns"
+                                        }
+                                    }
+                                },
+                                "module": "acme"
+                            },
+                            {
+                                "challenges": {
+                                    "dns": {
+                                        "provider": {
+                                            "access_key_id": "",
+                                            "access_key_secret": "",
+                                            "name": "alidns"
+                                        }
+                                    }
+                                },
+                                "module": "zerossl"
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}
