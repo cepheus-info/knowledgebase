@@ -1,0 +1,12 @@
+{
+    https_port 2143
+    acme_dns alidns {
+            access_key_id {your-id}
+            access_key_secret {your-secret}
+    }
+}
+
+harbor.sfdapp.com {
+    reverse_proxy 127.0.0.1:8089
+    tls wujuntaocn@outlook.com
+}
