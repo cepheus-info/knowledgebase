@@ -454,6 +454,19 @@ podTemplate(
             currentBuild.displayName = "#${env.BUILD_ID} v${version}"
         }
 
+        stage('Sonarqube') {
+            echo '========Sonarqube========'
+            withSonarQubeEnv('sonarqube') {
+                withGradle {
+                    sh './gradlew sonarqube'
+                }
+            }
+
+            always {
+                echo '========Sonarqube finished========'
+            }
+        }
+
         stage('Build') {
             withGradle {
                 sh 'chmod a+x gradlew'

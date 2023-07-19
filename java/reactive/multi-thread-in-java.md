@@ -447,7 +447,7 @@ public class ThreadPoolExample {
 
 ### 5.1. Future
 
-Future is a placeholder for a result that will be available in the future.
+Future is a placeholder for a result that will be available in the future. Future was introduced in Java 5.
 
 ```java
 public class FutureExample {
@@ -465,3 +465,139 @@ public class FutureExample {
     }
 }
 ```
+
+### 5.2. CompletableFuture
+
+CompletableFuture is a Future that can be completed manually. CompletableFuture was introduced in Java 8.
+
+```java
+public class CompletableFutureExample {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        CompletableFuture<String> completableFuture = new CompletableFuture<>();
+
+        Executors.newCachedThreadPool().submit(() -> {
+            Thread.sleep(1000);
+            completableFuture.complete("Hello World!");
+            return null;
+        });
+
+        System.out.println(completableFuture.get());
+    }
+}
+```
+
+### 5.3. The Difference Between Future and CompletableFuture
+
+- Future can only be completed by a thread that is not the thread that created the Future. CompletableFuture can be completed by any thread.
+
+- Future cannot be chained. CompletableFuture can be chained.
+
+- Future cannot be combined. CompletableFuture can be combined.
+
+Both of them can be used to wait for a result that will be available in the future.
+
+## 6. Fork/Join Framework
+
+Fork/Join framework is a framework that is used to execute tasks in parallel.
+
+```java
+public class ForkJoinExample {
+    public static void main(String[] args) {
+        ForkJoinPool forkJoinPool = new ForkJoinPool();
+
+        forkJoinPool.invoke(new RecursiveAction() {
+            @Override
+            protected void compute() {
+                System.out.println("Hello World!");
+            }
+        });
+
+        forkJoinPool.shutdown();
+    }
+}
+```
+
+A forkJoinPool is a thread pool that is used to execute tasks in parallel. It is a special thread pool that is designed for the fork/join framework.
+
+## 7. Parallel Stream
+
+Parallel stream is a stream that is used to execute tasks in parallel.
+
+```java
+public class ParallelStreamExample {
+    public static void main(String[] args) {
+        Stream.of("Hello", "World")
+                .parallel()
+                .forEach(System.out::println);
+    }
+}
+```
+
+Parallel stream make use of the fork/join framework to execute tasks in parallel.
+
+## 8. @Async Annotation
+
+@Async annotation is an annotation that is used to execute a method asynchronously.
+
+```java
+@SpringBootApplication
+@EnableAsync
+public class Main() {
+    public static void main(String[] args) {
+        SpringApplication.run(Main.class, args);
+    }
+}
+
+@Slf4j
+@RestController
+public class PersonController {
+
+    public String createPerson(@RequestBody CreateOrUpdatePersonRequest request) throws InterruptedException {
+        commandGateway.sendAndWait(new CreatePersonCommand(request.getPersonId(), request.getStaffName()));
+        // Get concurrent results via CompletableFuture.join()
+        Stream.of(
+                staffService.helloAsync("1"),
+                staffService.helloAsync("2"),
+                staffService.helloAsync("3")
+        ).map(CompletableFuture::join).forEach(log::info);
+
+        // Get concurrent results via parallelStream()
+        List.of("1", "2", "3").parallelStream().map(staffService::hello).forEach(log::info);
+
+        // Get concurrent results via pure Thread
+        Thread thread1 = new Thread(() -> staffService.hello("1"));
+        Thread thread2 = new Thread(() -> staffService.hello("2"));
+        Thread thread3 = new Thread(() -> staffService.hello("3"));
+        thread1.start();
+        thread2.start();
+        thread3.start();
+        try {
+            thread1.join();
+            thread2.join();
+            thread3.join();
+        } catch (InterruptedException e) {
+            log.error("Thread interrupted", e);
+            throw e;
+        }
+
+        return staffService.helloAsync("final").join();
+    }
+
+}
+
+@Service
+public class StaffService {
+
+    @Async("threadPoolTaskExecutor")
+    public CompletableFuture<String> helloAsync(String message) {
+        return CompletableFuture.completedFuture("transform" + message);
+    }
+
+    public String hello(String message) {
+        return message;
+    }
+
+}
+```
+
+The method annotated with @Async will return a Future. You can use Future.get() to get the result in a blocking way. And you can use CompletableFuture.join() to get the result in a non-blocking way.

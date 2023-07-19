@@ -129,7 +129,7 @@ Transaction isolation levels:
 - Read Committed: non-repeatable read, phantom read.
 
 - Repeatable Read: phantom read.
-  Note: In MySQL Innodb, the default isolation level is Repeatable Read. And the phantom read is avoided by gap lock.
+  Note: In MySQL Innodb, the default isolation level is Repeatable Read. However, the phantom read is avoided by gap lock.
 
 - Serializable: no dirty read, no non-repeatable read, no phantom read. (This is the highest isolation level, and it's not recommended to use this level in production environment, because it will cause a lot of performance issues.)
 
@@ -140,6 +140,11 @@ Locks:
 - Exclusive Lock: write lock, only one exclusive lock can be held on the same resource.
 
 - Gap Lock: gap lock is a kind of shared lock, it's used to avoid phantom read.
+  An example of gap lock:
+
+  ```sql
+  SELECT * FROM t WHERE id > 10 AND id < 20 FOR UPDATE;
+  ```
 
 - Next-Key Lock: next-key lock is a kind of gap lock, it's used to avoid phantom read.
 
