@@ -21,6 +21,8 @@ cd deploy
 
 Now we can edit the deployment files to use our own NFS server.
 
+> Note: you can find a copy of the files in [templates/nfs](./templates/nfs/) folder.
+
 ### Setup authorization
 
 If your cluster has RBAC enabled you must authorize the provisioner.
@@ -56,6 +58,10 @@ spec:
             path: /home/share/kubernetes
 ```
 
+```bash
+kubectl apply -f deployment.yaml
+```
+
 ### Deploying your storage class
 
 You can refer to [https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner](https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner) for more details.
@@ -69,4 +75,8 @@ provisioner: k8s-sigs.io/nfs-subdir-external-provisioner # or choose another nam
 parameters:
   pathPattern: "${.PVC.namespace}-${.PVC.name}"
   archiveOnDelete: "false"
+```
+
+```bash
+kubectl apply -f class.yaml
 ```

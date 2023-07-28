@@ -654,27 +654,27 @@ sudo kubeadm join 192.168.74.100:6443 --token ag1o4m.dsyhniky9m0r3l3p --discover
 1. First you should execute reset command, note this will delete /etc/kubernetes/manifest & /etc/kubernetes/pki contents, which are needed by us.
 
 ```bash
-sudo kubeadm reset
+kubeadm reset --cri-socket unix:///var/run/crio/crio.sock
 ```
 
 2. Second copy keepalived.yaml & haproxy.yaml into /etc/kubernetes/manifest.
 
 ```bash
-sudo cp /home/kubernetes/loadbalance/*.yaml /etc/kubernetes/manifests/
+cp /home/kubernetes/loadbalance/*.yaml /etc/kubernetes/manifests/
 ```
 
 3. Use kubeadm init
 
 ```bash
-sudo kubeadm init --config kubeadm-config.yaml
+kubeadm init --config kubeadm-config.yaml
 ```
 
 4. Configure kubectl
 
 ```bash
 mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
+cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 
 ## 9. Reset a backup node
@@ -684,33 +684,31 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 1. First you should execute reset command, note this will delete /etc/kubernetes/manifest & /etc/kubernetes/pki contents, which are needed by us.
 
 ```bash
-sudo kubeadm reset
+kubeadm reset --cri-socket unix:///var/run/crio/crio.sock
 ```
 
 2. Second copy keepalived.yaml & haproxy.yaml into /etc/kubernetes/manifest.
 
 ```bash
-sudo cp /home/kubernetes/loadbalance/*.yaml /etc/kubernetes/manifests/
-# for alpine linux
 cp /home/kubernetes/loadbalance/*.yaml /etc/kubernetes/manifests/
 ```
 
 3. Third, copy pki files & admin.conf into /etc/kubernetes/. If primary node reset, then you should execute scp to copy from there first. See [scp command to share pki files](#scpCommandSharePKIFiles)
 
 ```bash
-sudo cp -r /home/kubernetes/pki/* /etc/kubernetes/pki
-sudo cp /home/kubernetes/admin.conf /etc/kubernetes
+cp -r /home/kubernetes/pki/* /etc/kubernetes/pki
+cp /home/kubernetes/admin.conf /etc/kubernetes
 # Add read permission
-sudo chmod a+r /etc/kubernetes/*
+chmod a+r /etc/kubernetes/*
 ```
 
 4. Now you can rejoin using generated join-command.
 
 ```bash
 # print join command
-sudo kubeadm token create --print-join-command
+kubeadm token create --print-join-command
 # remember to append bind port
-sudo kubeadm join 192.168.74.100:6443 --token ag1o4m.dsyhniky9m0r3l3p --discovery-token-ca-cert-hash sha256:a06d6a459ecde712a32a713d17d523e4b6d9a742d61c14e420825fb0969f7e03 --control-plane --apiserver-bind-port 6444 --cri-socket unix:///var/run/crio/crio.sock
+kubeadm join 192.168.74.100:6443 --token ag1o4m.dsyhniky9m0r3l3p --discovery-token-ca-cert-hash sha256:a06d6a459ecde712a32a713d17d523e4b6d9a742d61c14e420825fb0969f7e03 --control-plane --apiserver-bind-port 6444 --cri-socket unix:///var/run/crio/crio.sock
 ```
 
 ## 10. Kubernetes dashboard
@@ -807,7 +805,7 @@ kubectl port-forward -n kubernetes-dashboard services/kubernetes-dashboard 10443
 
 > Now we can use https://192.168.74.100:10443 to access dashboard with previously created token.
 
-## 11 Node selector for workload
+## 11. Node selector for workload
 
 ```bash
 # Use --show-labels to view existing label
@@ -817,4 +815,90 @@ kubectl get nodes --show-labels
 ```bash
 Use kubectl label to create labels
 kubectl label nodes <your-node-name> name=label
+```
+
+## 12. Backup & Restore
+
+Backup & Restore is a very important topic, but it's not easy to do it right. I will introduce some concepts here.
+
+### 12.1 What need to be backuped?
+
+#### 12.1.1. etcd data
+
+etcd data is the most important data in kubernetes cluster, it stores all cluster data, including cluster configuration, workload data, etc. If you lost etcd data, you lost everything.
+
+The etcd data is stored in /var/lib/etcd, you can backup it by copying it to another place. But later we'll introduce a better way to backup etcd data.
+
+#### 12.1.2. pki files
+
+pki files are used to verify cluster nodes, if you lost them, you cannot join cluster again.
+
+The pki files are stored in /etc/kubernetes/pki.
+
+#### 12.1.3. kubeconfig files
+
+kubeconfig files are used to access cluster, if you lost them, you cannot access cluster again.
+
+The kubeconfig files are stored in /etc/kubernetes.
+
+### 12.2 How to backup & restore?
+
+#### 12.2.1. etcd data
+
+We can use etcdctl to backup etcd data, but we need to install etcdctl first. Even if we use a stacked style architecture of kubernetes, we still need to install etcdctl on master node.
+
+```bash
+# Install etcdctl on openSUSE
+sudo zypper install etcdctl
+# Install etcdctl on Ubuntu
+sudo apt install etcdctl
+# Install etcdctl on alpine linux
+apk add etcd-ctl
+```
+
+- /home/kubernetes/etcd/backup-etcd.sh
+
+```bash
+#!/bin/bash
+# Backup etcd data
+etcdctl --endpoints=https://localhost:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key snapshot save /home/kubernetes/etcd/etcd-snapshot.db
+```
+
+- /home/kubernetes/etcd/restore-etcd.sh
+
+```bash
+#!/bin/bash
+# Restore etcd data
+etcdctl --endpoints=https://localhost:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key snapshot restore /home/kubernetes/etcd/etcd-snapshot.db
+```
+
+These commands will backup etcd data to /home/kubernetes/etcd/etcd-snapshot.db, and restore etcd data from /home/kubernetes/etcd-snapshot.db.
+
+However, we'll need to add a realtime backup mechanism for etcd data, because we cannot stop etcd service to backup data. To achieve that, add a crontab job to backup etcd data every 5 minutes.
+
+```bash
+# Add a crontab job
+crontab -e
+```
+
+```bash
+*/5 * * * * /home/kubernetes/etcd/backup-etcd.sh
+```
+
+#### 12.2.2. pki files
+
+We can backup pki files by copying them to another place.
+
+```bash
+# Backup pki files
+cp -r /etc/kubernetes/pki /home/kubernetes/pki
+```
+
+#### 12.2.3. kubeconfig files
+
+We can backup kubeconfig files by copying them to another place.
+
+```bash
+# Backup kubeconfig files
+cp -r /etc/kubernetes /home/kubernetes
 ```
