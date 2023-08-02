@@ -810,11 +810,17 @@ kubectl port-forward -n kubernetes-dashboard services/kubernetes-dashboard 10443
 ```bash
 # Use --show-labels to view existing label
 kubectl get nodes --show-labels
+# Show master node
+# kubectl get nodes -l node-role.kubernetes.io/master
+# Show worker node
+# kubectl get nodes -l node-role.kubernetes.io/worker
 ```
 
 ```bash
 Use kubectl label to create labels
 kubectl label nodes <your-node-name> name=label
+# label as master
+kubectl label nodes k8s-master node-role.kubernetes.io/master=
 ```
 
 ## 12. Backup & Restore
