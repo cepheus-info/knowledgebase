@@ -80,6 +80,26 @@
 
     例如：ChangeRecordedEvent 事件，需要保证对 PersonWages 表的更新和对 ChangeRecord 表、PersonSnapshot 表的插入是强一致的，同时需要保证对`mono-service`和`fund-service`中的更新是最终一致的。
 
+```java
+class PersonAggregate {
+
+  private List<AnnualCheck> annualChecks;
+
+    @CommandHandler
+    public void handle(ChangeCommand command) {
+      // 1. 校验
+      // 2. 更新 PersonAggregate
+      // 3. 发布 ChangeRecordedEvent
+    }
+
+
+
+    @EventSourcingHandler(ResumeChangeEvent event) {
+
+    }
+}
+```
+
 ### 4.2. 框架版本升级
 
 - 升级 Spring Boot 版本至 2.7.x
@@ -105,3 +125,37 @@
 ### 5.2. 说明
 
 知识传递应当是一个持续且可沉淀的过程，因此我将利用公司内部的 GitLab 作为知识库，将工作中的疑难问题、解决方案、技术分享等内容沉淀到知识库中，以便后续的同事能够快速的获取到相关的知识。
+
+## 6. 补充
+
+### 6.1 数据一致性问题
+
+### 6.2 Axon 未知实例
+
+### 6.3 Axon 事件处理器无异常但不工作
+
+### 6.4. 应用集群合并
+
+AxonServer Reader -> Axon Server 1, 2, 3
+
+Publish Message ->
+
+AxonServer Writer -> Axon Server new
+
+### 6.5. Mongo 事务未开启
+
+### 6.6. 测算服务 Instance 数量 <-> PooledStream Processor 数量
+
+全部指向同一个实例。
+
+### 6.7. 国产化环境 部署环境管理
+
+001（省直 Docker 部署)
+002 (成都机关 jar 包部署)
+003 (泸州版本 jar 包部署)
+
+Docker -> jar 包
+Docker: docker-compose.yml 配置环境变量
+jar 包: external application.properties
+
+解决方式：Jenkins CI 集成 jar 包发布
