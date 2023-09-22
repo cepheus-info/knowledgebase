@@ -124,6 +124,23 @@ git list --root /home/another/location --out dump > repos.dump
 git get --dump /path/to/repos.dump
 ```
 
+> Note: The above method will clone repositories with --single-branch flag, which means only the default branch will be cloned. If you need to clone all branches, you can use below command after cloning.
+
+```bash
+git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+git fetch origin
+```
+
+You can use a for loop to do this for all repositories in a directory recursively.
+
+```bash
+for i in `find . -name .git`; do cd $i/..; git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"; git fetch origin; cd -; done
+```
+
 ## Conslusion
 
 Use such command line tools will make your workspace clearer. And it's useful when backup multi repositories records as it's just plain URLs.
+
+## Reference
+
+- [https://www.gangofcoders.net/solution/how-do-i-undo-a-single-branch-clone/](https://www.gangofcoders.net/solution/how-do-i-undo-a-single-branch-clone/)
