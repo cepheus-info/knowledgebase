@@ -1,0 +1,379 @@
+{
+    "log": {
+        "access": "D:\\Bin\\v2ray-windows-64\\log\\access.log",
+        "error": "D:\\Bin\\v2ray-windows-64\\log\\error.log",
+        "loglevel": "warn"
+    },
+    "stats": {},
+    "routing": {
+        "domainStrategy": "IPIfNonMatch",
+        "rules": [
+            {
+                "type": "field",
+                "domain": [
+                    "bing.net",
+                    "bing.com",
+                    "cloudflare.com",
+                    "geosite:cn"
+                ],
+                "ip": [
+                    "geoip:private",
+                    "geoip:cn"
+                ],
+                "outboundTag": "direct"
+            },
+            {
+                "type": "field",
+                "ip": [
+                    "geoip:!cn"
+                ],
+                "balancerTag": "loadbalance"
+            }
+        ],
+        "balancers": [
+            {
+                "tag": "loadbalance",
+                "selector": [
+                    "vmess1",
+                    "vmess2",
+                    "vmess3",
+                    "vmess4",
+                    "vmess5",
+                    "vmess6",
+                    "vmess7",
+                    "vmess8"
+                ],
+                "strategy": {
+                    "type": "random"
+                }
+            }
+        ]
+    },
+    "policy": {},
+    "reverse": {},
+    "inbounds": [
+        {
+            "port": 1080,
+            "listen": "127.0.0.1",
+            "protocol": "http",
+            "sniffing": {
+                "enabled": true,
+                "destOverride": [
+                    "http",
+                    "tls"
+                ]
+            },
+            "settings": {
+                "auth": "noauth",
+                "udp": true
+            }
+        }
+    ],
+    "outbounds": [
+        {
+            "protocol": "vmess",
+            "settings": {
+                "vnext": [
+                    {
+                        "address": "***.***.***.***",
+                        "port": 10087,
+                        "users": [
+                            {
+                                "id": "***-****-****-****-************"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "streamSettings": {
+                "network": "tcp",
+                "security": "none",
+                "tcpSettings": {
+                    "header": {
+                        "type": "none"
+                    }
+                }
+            },
+            "tag": "vmess1"
+        },
+        {
+            "protocol": "vmess",
+            "settings": {
+                "vnext": [
+                    {
+                        "address": "104.238.182.114",
+                        "port": 10088,
+                        "users": [
+                            {
+                                "id": "***-****-****-****-************"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "streamSettings": {
+                "network": "quic",
+                "security": "none",
+                "quicSettings": {
+                    "security": "aes-128-gcm",
+                    "key": "opensuse",
+                    "header": {
+                        "type": "wechat-video"
+                    }
+                }
+            },
+            "tag": "vmess2"
+        },
+        {
+            "protocol": "vmess",
+            "settings": {
+                "vnext": [
+                    {
+                        "address": "104.238.182.114",
+                        "port": 10089,
+                        "users": [
+                            {
+                                "id": "***-****-****-****-************"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "streamSettings": {
+                "network": "quic",
+                "security": "none",
+                "quicSettings": {
+                    "security": "none",
+                    "key": "",
+                    "header": {
+                        "type": "utp"
+                    }
+                }
+            },
+            "tag": "vmess3"
+        },
+        {
+            "protocol": "vmess",
+            "settings": {
+                "vnext": [
+                    {
+                        "address": "104.238.182.114",
+                        "port": 10090,
+                        "users": [
+                            {
+                                "id": "***-****-****-****-************"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "streamSettings": {
+                "network": "tcp",
+                "security": "none",
+                "tcpSettings": {
+                    "header": {
+                        "type": "http",
+                        "request": {
+                            "version": "1.1",
+                            "method": "GET",
+                            "path": [
+                                "/"
+                            ],
+                            "headers": {
+                                "Host": [
+                                    "www.baidu.com",
+                                    "www.bing.com"
+                                ],
+                                "User-Agent": [
+                                    "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36",
+                                    "Mozilla/5.0 (iPhone; CPU iPhone OS 10_0_2 like Mac OS X) AppleWebKit/601.1 (KHTML, like Gecko) CriOS/53.0.2785.109 Mobile/14A456 Safari/601.1.46"
+                                ],
+                                "Accept-Encoding": [
+                                    "gzip, deflate"
+                                ],
+                                "Connection": [
+                                    "keep-alive"
+                                ],
+                                "Pragma": "no-cache"
+                            }
+                        },
+                        "response": {
+                            "version": "1.1",
+                            "status": "200",
+                            "reason": "OK",
+                            "headers": {
+                                "Content-Type": [
+                                    "application/octet-stream",
+                                    "video/mpeg"
+                                ],
+                                "Transfer-Encoding": [
+                                    "chunked"
+                                ],
+                                "Connection": [
+                                    "keep-alive"
+                                ],
+                                "Pragma": "no-cache"
+                            }
+                        }
+                    }
+                }
+            },
+            "tag": "vmess4"
+        },
+        {
+            "protocol": "vmess",
+            "settings": {
+                "vnext": [
+                    {
+                        "address": "***.***.***.***",
+                        "port": 10087,
+                        "users": [
+                            {
+                                "id": "***-****-****-****-************"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "streamSettings": {
+                "network": "tcp",
+                "security": "none",
+                "tcpSettings": {
+                    "header": {
+                        "type": "none"
+                    }
+                }
+            },
+            "tag": "vmess5"
+        },
+        {
+            "protocol": "vmess",
+            "settings": {
+                "vnext": [
+                    {
+                        "address": "***.***.***.***",
+                        "port": 10088,
+                        "users": [
+                            {
+                                "id": "***-****-****-****-************"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "streamSettings": {
+                "network": "quic",
+                "security": "none",
+                "quicSettings": {
+                    "security": "aes-128-gcm",
+                    "key": "opensuse",
+                    "header": {
+                        "type": "wechat-video"
+                    }
+                }
+            },
+            "tag": "vmess6"
+        },
+        {
+            "protocol": "vmess",
+            "settings": {
+                "vnext": [
+                    {
+                        "address": "***.***.***.***",
+                        "port": 10089,
+                        "users": [
+                            {
+                                "id": "***-****-****-****-************"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "streamSettings": {
+                "network": "quic",
+                "security": "none",
+                "quicSettings": {
+                    "security": "none",
+                    "key": "",
+                    "header": {
+                        "type": "utp"
+                    }
+                }
+            },
+            "tag": "vmess7"
+        },
+        {
+            "protocol": "vmess",
+            "settings": {
+                "vnext": [
+                    {
+                        "address": "***.***.***.***",
+                        "port": 10090,
+                        "users": [
+                            {
+                                "id": "***-****-****-****-************"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "streamSettings": {
+                "network": "tcp",
+                "security": "none",
+                "tcpSettings": {
+                    "header": {
+                        "type": "http",
+                        "request": {
+                            "version": "1.1",
+                            "method": "GET",
+                            "path": [
+                                "/"
+                            ],
+                            "headers": {
+                                "Host": [
+                                    "www.baidu.com",
+                                    "www.bing.com"
+                                ],
+                                "User-Agent": [
+                                    "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36",
+                                    "Mozilla/5.0 (iPhone; CPU iPhone OS 10_0_2 like Mac OS X) AppleWebKit/601.1 (KHTML, like Gecko) CriOS/53.0.2785.109 Mobile/14A456 Safari/601.1.46"
+                                ],
+                                "Accept-Encoding": [
+                                    "gzip, deflate"
+                                ],
+                                "Connection": [
+                                    "keep-alive"
+                                ],
+                                "Pragma": "no-cache"
+                            }
+                        },
+                        "response": {
+                            "version": "1.1",
+                            "status": "200",
+                            "reason": "OK",
+                            "headers": {
+                                "Content-Type": [
+                                    "application/octet-stream",
+                                    "video/mpeg"
+                                ],
+                                "Transfer-Encoding": [
+                                    "chunked"
+                                ],
+                                "Connection": [
+                                    "keep-alive"
+                                ],
+                                "Pragma": "no-cache"
+                            }
+                        }
+                    }
+                }
+            },
+            "tag": "vmess8"
+        },
+        {
+            "protocol": "freedom",
+            "tag": "direct",
+            "settings": {}
+        }
+    ]
+}

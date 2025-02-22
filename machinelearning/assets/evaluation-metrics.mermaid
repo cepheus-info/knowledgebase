@@ -1,0 +1,7 @@
+graph LR
+    A[Model Training] --> B{Model Type}
+    B -->|CNN| C[Measure Accuracy]
+    B -->|GAN| D[Calculate FID Score]
+    C --> E[Adjust Parameters]
+    D --> E
+    E --> A

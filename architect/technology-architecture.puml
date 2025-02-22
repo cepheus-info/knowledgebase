@@ -1,0 +1,52 @@
+@startuml
+!define RECTANGLE component
+
+package "Application Hosting" {
+    RECTANGLE "Java Web Application\n(Azure App Service - Linux Tomcat Stack)" as JavaApp {
+        RECTANGLE "Servlet Backend" as Servlet
+        RECTANGLE "Static Directory\n(React Application)" as ReactApp
+    }
+    cloud "Load Balancer" as LB
+    RECTANGLE "Worker Process 1\n(Servlet Backend Instance)" as WP1
+    RECTANGLE "Worker Process 2\n(Servlet Backend Instance)" as WP2
+    RECTANGLE "Worker Process N\n(Servlet Backend Instance)" as WPN
+    note right of LB : "Distributes user requests\nto worker processes\nautomatically"
+}
+
+package "Database" {
+    database "Oracle Database\n(On-Premise Data Center)" as OracleDB
+}
+
+package "External Services" {
+    RECTANGLE "PowerBI Reporting Server\n(External)" as PowerBI
+}
+
+package "Security" {
+    cloud "Azure Key Vaults" as KeyVaults
+    cloud "Microsoft Entra ID\n(SSO)" as SSO
+}
+
+package "Monitoring" {
+    cloud "Azure Monitoring\n& Devo" as Monitoring
+    cloud "NewRelic\n(Alerts & Dashboard)" as NewRelic
+}
+
+package "DevOps" {
+    node "Jenkins Pipeline\n& BitBucket\n(DevOps & Git Repo)" as DevOps
+}
+
+JavaApp --> LB : "Receives all user requests"
+LB --> WP1
+LB --> WP2
+LB --> WPN : "Load balanced"
+WP1 --> OracleDB : "JDBC\nPort 1521"
+WP2 --> OracleDB : "JDBC\nPort 1521"
+WPN --> OracleDB : "JDBC\nPort 1521"
+JavaApp --> PowerBI : "API Integration"
+JavaApp --> KeyVaults : "SDK Access"
+JavaApp --> SSO : "OAuth2\nSSO Integration"
+JavaApp --> Monitoring : "Log Streaming"
+JavaApp --> NewRelic : "Metric Collection"
+JavaApp --> DevOps : "CI/CD Pipeline"
+
+@enduml

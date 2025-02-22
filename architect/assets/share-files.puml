@@ -1,0 +1,20 @@
+@startuml
+!define AzurePuml https://raw.githubusercontent.com/RicardoNiepel/Azure-PlantUML/release/2-2/dist
+!includeurl AzurePuml/AzureCommon.puml
+!includeurl AzurePuml/Compute/AzureAppService.puml
+!includeurl AzurePuml/Networking/AzureVPNGateway.puml
+
+package "Azure" {
+    AzureAppService(appService, "Azure App Service", "Hosts web application")
+    AzureVPNGateway(vpnGateway, "VPN Gateway/ExpressRoute", "Secure connectivity")
+}
+
+node "On-Premises" {
+    database "File Server" as fileServer {
+        folder "Shared Files" as Files
+    }
+}
+
+appService -down-> vpnGateway : "Connects through"
+vpnGateway -down-> fileServer : "Accesses files"
+@enduml

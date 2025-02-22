@@ -1,0 +1,84 @@
+{
+    "routing": {
+        "domainStrategy": "IPOnDemand",
+        "rules": [
+            {
+                "type": "field",
+                "ip": [
+                    "geoip:private"
+                ],
+                "outboundTag": "direct"
+            }
+        ]
+    },
+    "inbounds": [
+        {
+            "port": 1080,
+            "listen": "127.0.0.1",
+            "protocol": "http",
+            "settings": {
+                "udp": true
+            }
+        }
+    ],
+    "outbounds": [
+        {
+            "protocol": "vmess",
+            "settings": {
+                "vnext": [
+                    {
+                        "address": "***.***.***.***",
+                        "port": 10088,
+                        "users": [
+                            {
+                                "id": "***-****-****-****-************"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "streamSettings": {
+                "network": "quic",
+                "security": "none",
+                "quicSettings": {
+                    "security": "aes-128-gcm",
+                    "key": "opensuse",
+                    "header": {
+                        "type": "wechat-video"
+                    }
+                }
+            }
+        },
+        {
+            "protocol": "vmess",
+            "settings": {
+                "vnext": [
+                    {
+                        "address": "***.***.***.***",
+                        "port": 10087,
+                        "users": [
+                            {
+                                "id": "***-****-****-****-************",
+                                "security": "auto"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "streamSettings": {
+                "network": "tcp",
+                "security": "none",
+                "tcpSettings": {
+                    "header": {
+                        "type": "none"
+                    }
+                }
+            }
+        },
+        {
+            "protocol": "freedom",
+            "tag": "direct",
+            "settings": {}
+        }
+    ]
+}

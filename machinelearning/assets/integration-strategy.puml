@@ -1,0 +1,15 @@
+@startuml
+!theme plain
+
+actor Developer
+participant "CNN Model" as CNN
+participant "Feature Vector" as FV
+participant "GAN Model" as GAN
+database "Handwriting Dataset" as HD
+
+Developer -> CNN : Train with\nHandwriting Dataset
+CNN -> FV : Extract
+FV -> GAN : Inject Feature Vectors
+GAN -> HD : Generate & Validate
+
+@enduml

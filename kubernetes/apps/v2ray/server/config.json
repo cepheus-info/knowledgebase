@@ -1,0 +1,166 @@
+{
+    "log": {
+        "access": "/var/log/v2ray/access.log",
+        "error": "/var/log/v2ray/error.log",
+        "loglevel": "warn"
+    },
+    "dns": {},
+    "stats": {},
+    "routing": {},
+    "policy": {},
+    "reverse": {},
+    "inbounds": [
+        {
+            "port": 10087,
+            "protocol": "vmess",
+            "settings": {
+                "clients": [
+                    {
+                        "id": "***-****-****-****-************",
+                        "email": "***@example.com"
+                    },
+                    {
+                        "id": "***-****-****-****-************",
+                        "email": "***@example.com"
+                    },
+                    {
+                        "id": "***-****-****-****-************",
+                        "email": "***@example.com"
+                    }
+                ]
+            },
+            "streamSettings": {
+                "network": "tcp",
+                "security": "none",
+                "tcpSettings": {
+                    "header": {
+                        "type": "none"
+                    }
+                }
+            }
+        },
+        {
+            "port": 10088,
+            "protocol": "vmess",
+            "settings": {
+                "clients": [
+                    {
+                        "id": "***-****-****-****-************",
+                        "email": "***@example.com"
+                    },
+                    {
+                        "id": "***-****-****-****-************",
+                        "email": "***@example.com"
+                    },
+                    {
+                        "id": "***-****-****-****-************",
+                        "email": "***@example.com"
+                    }
+                ]
+            },
+            "streamSettings": {
+                "network": "quic",
+                "security": "none",
+                "quicSettings": {
+                    "security": "aes-128-gcm",
+                    "key": "opensuse",
+                    "header": {
+                        "type": "wechat-video"
+                    }
+                }
+            }
+        },
+        {
+            "port": 10089,
+            "protocol": "vmess",
+            "settings": {
+                "clients": [
+                    {
+                        "id": "***-****-****-****-************",
+                        "email": "***@example.com"
+                    }
+                ]
+            },
+            "streamSettings": {
+                "network": "quic",
+                "security": "none",
+                "quicSettings": {
+                    "security": "none",
+                    "key": "",
+                    "header": {
+                        "type": "utp"
+                    }
+                }
+            }
+        },
+        {
+            "port": 10090,
+            "protocol": "vmess",
+            "settings": {
+                "clients": [
+                    {
+                        "id": "***-****-****-****-************",
+                        "email": "***@example.com"
+                    }
+                ]
+            },
+            "streamSettings": {
+                "network": "tcp",
+                "security": "none",
+                "tcpSettings": {
+                    "header": {
+                        "type": "http",
+                        "request": {
+                            "version": "1.1",
+                            "method": "GET",
+                            "path": [
+                                "/"
+                            ],
+                            "headers": {
+                                "Host": [
+                                    "www.baidu.com",
+                                    "www.bing.com"
+                                ],
+                                "User-Agent": [
+                                    "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36",
+                                    "Mozilla/5.0 (iPhone; CPU iPhone OS 10_0_2 like Mac OS X) AppleWebKit/601.1 (KHTML, like Gecko) CriOS/53.0.2785.109 Mobile/14A456 Safari/601.1.46"
+                                ],
+                                "Accept-Encoding": [
+                                    "gzip, deflate"
+                                ],
+                                "Connection": [
+                                    "keep-alive"
+                                ],
+                                "Pragma": "no-cache"
+                            }
+                        },
+                        "response": {
+                            "version": "1.1",
+                            "status": "200",
+                            "reason": "OK",
+                            "headers": {
+                                "Content-Type": [
+                                    "application/octet-stream",
+                                    "video/mpeg"
+                                ],
+                                "Transfer-Encoding": [
+                                    "chunked"
+                                ],
+                                "Connection": [
+                                    "keep-alive"
+                                ],
+                                "Pragma": "no-cache"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ],
+    "outbounds": [
+        {
+            "protocol": "freedom",
+            "settings": {}
+        }
+    ]
+}

@@ -37,6 +37,14 @@ services:
     command: -c "echo hello world"
 ```
 
+```yaml
+version: "3.7"
+services:
+  myservice:
+    image: ubuntu
+    entrypoint: tail -f /dev/null
+```
+
 ## Example
 
 When we run the following [docker-compose.goaccess.yml](../nginx/templates/docker-compose.goaccess.yml) file, we will see how this override work.

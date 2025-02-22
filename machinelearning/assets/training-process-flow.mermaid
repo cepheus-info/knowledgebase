@@ -1,0 +1,9 @@
+graph TD
+    A[Start Training] --> B{Is CNN Trained?}
+    B -->|Yes| C[Train GAN]
+    B -->|No| D[Train CNN]
+    D --> E[Extract Feature Vectors]
+    E --> C
+    C --> F{Is Training Complete?}
+    F -->|Yes| G[End Training]
+    F -->|No| C

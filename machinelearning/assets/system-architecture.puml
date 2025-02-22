@@ -1,0 +1,22 @@
+@startuml
+!theme plain
+
+package "Feature Extraction with CNN" {
+    [Input Layer] --> [Convolutional Layers]
+    [Convolutional Layers] --> [Pooling Layers]
+    [Pooling Layers] --> [Fully Connected Layers]
+    [Fully Connected Layers] --> [Output Feature Vector]
+}
+
+package "Font Generation with GAN" {
+    [Generator Input] --> [Generator]
+    [Generator] --> [Generated Image]
+    [Discriminator Input] --> [Discriminator]
+    [Discriminator] --> [Real/Fake Output]
+}
+
+[Output Feature Vector] --> [Generator Input]
+[Generated Image] --> [Discriminator Input]
+[Dataset Images] --> [Discriminator Input]
+
+@enduml
