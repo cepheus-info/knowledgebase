@@ -4,6 +4,7 @@ Option 1: The "Laptop Lab" Prompt (PoC)
 Best for: Your current 8GB Windows 11 Laptop.
 Key Feature: Aggressive resource capping & local Xray proxying.
 
+AdHoc Changes
 # ROLE
 Act as a Senior DevOps Engineer. Generate a `docker-compose.yml` and `.env` file for a "Proof of Concept" Home Media Stack.
 
